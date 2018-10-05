@@ -63,16 +63,24 @@ set(HDRS
     include/Expressionizer.h
 )
 
+
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
+
 add_library(expression STATIC ${SRCS} ${HDRS})
+
 
 ##############################
 ##
 ## Programs:
 ##
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/bin)
+
 add_executable(midi2exp tools/midi2exp.cpp)
+add_executable(velocities tools/velocities.cpp)
 
 target_link_libraries(midi2exp expression)
+target_link_libraries(velocities expression)
 
 
 

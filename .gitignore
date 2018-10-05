@@ -1,12 +1,13 @@
-err
 cmake_install.cmake
 CMakeCache.txt
 CMakeFiles
+Makefile
 *.a
 *.o
 *.exe
 *.mid
 *.txt
 .DS_Store
-midi2exp
-Makefile
+bin
+lib
+err

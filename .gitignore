@@ -6,5 +6,7 @@ CMakeFiles
 *.o
 *.exe
 *.mid
+*.txt
 .DS_Store
 midi2exp
+Makefile

@@ -11,7 +11,7 @@
 // description:   Command-line interface to interpret expression for piano roll MIDI files.
 //
 
-#include "ExpCreator.h"
+#include "Expressionizer.h"
 #include "Options.h"
 
 #include <stdlib.h>
@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
 	options.define("e|print-expression=b", "print expression time values");
 	options.process(argc, argv);
 
-	ExpCreator creator;
+	Expressionizer creator;
 
 	if (options.getString("input") == "-") {
 		cerr << "Error: cannot read from standard input yet." << endl;

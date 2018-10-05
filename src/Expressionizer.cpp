@@ -1,6 +1,17 @@
-// vim: ts=3
+//
+// Programmer:    Kitty Shi
+// Programmer:    Craig Stuart Sapp (translation to C++)
+// Creation Date: Thu Oct  4 16:32:27 PDT 2018
+// Last Modified: Fri Oct  5 00:25:41 PDT 2018
+// Filename:      midi2exp/src/Expressionizer.cpp
+// Website:       https://github.com/pianoroll/midi2exp
+// Syntax:        C++11
+// vim:           ts=3 noexpandtab
+//
+// description:   Class that applies expression note velocities.
+//
 
-#include "ExpCreator.h"
+#include "Expressionizer.h"
 
 #include <algorithm>
 #include <iostream>
@@ -11,67 +22,102 @@ using namespace smf;
 
 //////////////////////////////
 //
-// ExpCreator::addExpression -- Add expression to a MIDI file.
+// Expressionizer::Expressionizer -- Constructor.
 //
 
-void ExpCreator::addExpression(void) {
+Expressionizer::Expressionizer(void) {
+  	slow_step   =  cresc_rate * welte_mf            / slow_decay_rate;
+  	fastC_step  =  cresc_rate * (welte_f - welte_p) / fastC_decay_rate;
+  	fastD_step  = -cresc_rate * (welte_f - welte_p) / fastD_decay_rate;
+}
 
-	// calculate all expression slopes:
-  	// 2.0 is some regulation, modified from table 4.1 from Peter's thesis
-	double slow_decay  = 2380.0;
-	double fastC_decay = 700.0 * 2.0;
-	double fastD_decay = 150.0 * 2.2;
 
-  	slow_step   =  cresc_rate * welte_mf            / slow_decay;
-  	fastC_step  =  cresc_rate * (welte_f - welte_p) / fastC_decay;
-  	fastD_step  = -cresc_rate * (welte_f - welte_p) / fastD_decay;
 
+//////////////////////////////
+//
+// Expressionizer::Expressionizer -- Deconstructor.
+//
+
+Expressionizer::~Expressionizer(void) {
+	// do nothing
+}
+
+
+
+//////////////////////////////
+//
+// Expressionizer::addExpression -- Add expression velocities to a MIDI file.
+//
+
+void Expressionizer::addExpression(void) {
 	setPan();
-	calculateExpression();
 
-}
+	calculateRedWelteExpression("left_hand");
+	calculateRedWelteExpression("right_hand");
 
-
-
-//////////////////////////////
-//
-// ExpCreator::setPan -- Set a panning position for the bass and treble halfs of the piano.
-// 	Note: original midi file somehow has a panning information (32 left 96 right)
-//          The following function should update that message with a new value, and otherwise
-//          add a new message like it is doing below.
-//
-
-void ExpCreator::setPan(void) {
-	int tick = 1;
-	int controller_number = 10; // 10 = pan (0-indexed)
-	midi_data.addController(bass,   tick, bass_ch,   controller_number, pan_bass);
-	midi_data.addController(treble, tick, treble_ch, controller_number, pan_treble);
-}
-
-
-
-//////////////////////////////
-//
-// ExpCreator::calculateExpression --
-//
-
-void ExpCreator::calculateExpression(void) {
-
-	// sort expression according to time with pedaling information removed to avoid confusion
-	// pedal is on notes 20, 21, 106, 107
-
-	// then merge expression according to different combinations
-
-	calculateVelocity("left_hand");
-	calculateVelocity("right_hand");
-
-	// Adding Velocity
-	addVelocity(true);
-	addVelocity(false);
+	applyExpression("left_hand");
+	applyExpression("right_hand");
 
 	// Adding Pedal
 	// if self.read_pedal is true:
 	// 		self.addPedal()
+}
+
+
+
+//////////////////////////////
+//
+// Expressionizer::setPan -- Set a panning position for the bass and treble
+//    halfs of the piano.  Note: the original midi file may already have
+//    panning information (32 left 96 right). The following function should
+//    update that message with a new value, and otherwise add a new panning
+//    message.
+//
+
+void Expressionizer::setPan(void) {
+	// pan_cont_num: 10 == pan controller
+	int pan_cont_num = 10;
+
+	MidiEvent* bass_event = NULL;
+	MidiEvent* treble_event = NULL;
+	MidiEventList& bass_note_list   = midi_data[bass_ch];
+	MidiEventList& treble_note_list = midi_data[treble_ch];
+
+	// search for an existing pan message in each note list, and use
+	// that value if found; otherwise a new pan message will be added
+	//	to the MIDI file.
+
+	for (int i=0; i<bass_note_list.getEventCount(); i++) {
+		if (!bass_note_list[i].isController()) {
+			continue;
+		}
+		if (bass_note_list[i].getP1() == pan_cont_num) {
+			bass_event = &bass_note_list[i];
+		}
+	}
+
+	for (int i=0; i<treble_note_list.getEventCount(); i++) {
+		if (!treble_note_list[i].isController()) {
+			continue;
+		}
+		if (treble_note_list[i].getP1() == pan_cont_num) {
+			treble_event = &treble_note_list[i];
+		}
+	}
+
+	int tick = 0;
+
+	if (bass_event) {
+		bass_event->setP1(pan_bass);
+	} else {
+		midi_data.addController(bass_track, tick, bass_ch, pan_cont_num, pan_bass);
+	}
+
+	if (treble_event) {
+		treble_event->setP1(pan_treble);
+	} else {
+		midi_data.addController(treble_track, tick, treble_ch, pan_cont_num, pan_treble);
+	}
 
 }
 
@@ -79,19 +125,26 @@ void ExpCreator::calculateExpression(void) {
 
 //////////////////////////////
 //
-// ExpCreator::readMidiFile --
+// Expressionizer::readMidiFile --
 //
 
-bool ExpCreator::readMidiFile(std::string filename) {
-	return midi_data.read(filename);
+bool Expressionizer::readMidiFile(std::string filename) {
+	bool status =  midi_data.read(filename);
+	if (!status) {
+		return status;
+	}
+	midi_data.doTimeAnalysis();
+	return status;
 }
+
+
 
 //////////////////////////////
 //
-// ExpCreator::writeMidiFile --
+// Expressionizer::writeMidiFile --
 //
 
-bool ExpCreator::writeMidiFile(std::string filename) {
+bool Expressionizer::writeMidiFile(std::string filename) {
 	return midi_data.write(filename);
 }
 
@@ -173,21 +226,21 @@ bool ExpCreator::writeMidiFile(std::string filename) {
 
 //////////////////////////////
 //
-// ExpCreator::addVelocity --
+// Expressionizer::applyExpression --
+//
+// Input variable "option" can take two values: "left_hand" or "right_hand".
 //
 
-void ExpCreator::addVelocity(bool leftQ) {
-
+void Expressionizer::applyExpression(std::string option) {
 	int track;
+	vector<double>* timeline;
 
-	vector<double>* myexp;
-
-	if (leftQ) {
-		track = bass;
-		myexp = &exp_bass;
+	if (option == "left_hand") {
+		track = bass_track;
+		timeline = &exp_bass;
 	} else {
-		track = treble;
-		myexp = &exp_treble;
+		track = treble_track;
+		timeline = &exp_treble;
 	}
 	MidiEventList& mynotes = midi_data[track];
 
@@ -198,25 +251,24 @@ void ExpCreator::addVelocity(bool leftQ) {
 		}
 
 		// find closest velocity of the begin
-		int notebegin = int(me->seconds * 1000 + 0.5);
-		// int noteend = int((me->seconds + me->getDurationInSecond()) * 1000 + 0.5);
-		int ii = std::min(notebegin, (int)myexp->size() - 1);
-		int v = int(myexp->at(ii) + 0.5);
+		int starttime = int(me->seconds * 1000.0 + 0.5);
+		int ms = std::min(starttime, (int)timeline->size() - 1);
+		int velocity = int(timeline->at(ms) + 0.5);
 
-		if (v == 0) {
-			v = getPreviousNonzero(*myexp, ii);
+		if (velocity == 0) {
+			velocity = getPreviousNonzero(*timeline, ms);
 		}
 
-		if (leftQ) {
-			v = std::max(v + left_adjust, 0);
+		if (option == "left_hand") {
+			velocity = std::max(velocity + left_adjust, 0);
 		}
 
 		// if still equals 0, map it to 60
-		if (v == 0) {
-			v = 60;
+		if (velocity == 0) {
+			velocity = 60;
 		}
-		
-		me->setVelocity(v);
+
+		me->setVelocity(velocity);
 
 	}
 
@@ -226,16 +278,18 @@ void ExpCreator::addVelocity(bool leftQ) {
 
 //////////////////////////////
 //
-// ExpCreator::getPreviousNonzero -- Local function to get a nonzero previous value.
+// Expressionizer::getPreviousNonzero -- Get the previous nonzero value
+//     from a vector.
 //
 
-double ExpCreator::getPreviousNonzero(vector<double>& myArray, int start_index) {
+double Expressionizer::getPreviousNonzero(vector<double>& myArray,
+		int start_index) {
 	for (int i=start_index; i>=0; i--) {
 		if (myArray[i] > 0.0) {
 			return myArray[i];
 		}
 	}
-	//print '[Warning, did not find a velocity before this note, map to vel_mid (default 66)]'
+	// Could not find a previous value; return welte_mf:
 	return welte_mf;
 }
 
@@ -243,10 +297,10 @@ double ExpCreator::getPreviousNonzero(vector<double>& myArray, int start_index) 
 
 //////////////////////////////
 //
-// ExpCreator::calculateVelocity --
+// Expressionizer::calculateRedWelteExpression --
 //
-//		As of 2018-04-06, some modification (F: fast crescendo -- length of perforation)
-//		(F+slow crescendo: fastest crescendo)
+//		As of 2018-04-06, some modification (F: fast crescendo -- length 
+//    of perforation) (F+slow crescendo: fastest crescendo)
 //		Using Peter's velocity mapping: min30 MF60 Loud70 Max85
 //		dynamic range default 1.2, making welte_mf: 80, Max (F): 96, and Min (P) 66
 //		left_hand: 12 less than right hand
@@ -279,23 +333,24 @@ double ExpCreator::getPreviousNonzero(vector<double>& myArray, int start_index) 
 //    pianoside = "left_hand" or "right_hand";
 //
 
-void ExpCreator::calculateVelocity(std::string option) {
+void Expressionizer::calculateRedWelteExpression(std::string option) {
 	int track_index;
 	vector<double>* expression_list;
 
 	// Initial Setup of the expression curve
 	if (option == "left_hand") {
-		track_index = bass_exp;
+		track_index = bass_exp_track;
 		expression_list = &exp_bass;
 	} else {
-		track_index = treble_exp;
+		track_index = treble_exp_track;
 		expression_list = &exp_treble;
 	}
 
 	// exp_notes = notes for the expessions being processed.
 	MidiEventList& exp_notes = midi_data[track_index];
 
-	// length of the MIDI file in milliseconds (plus an extra millisecond to avoid problems):
+	// length of the MIDI file in milliseconds (plus an extra millisecond 
+	// to avoid problems):
 	int exp_length = midi_data.getFileDurationInSeconds() * 1000 + 1;
 	expression_list->resize(exp_length);
 
@@ -316,7 +371,8 @@ void ExpCreator::calculateVelocity(std::string option) {
 
 	int starttime = 0;
 
-	// First pass: For each time section calculate the current boolean state of each expression
+	// First pass: For each time section calculate the current boolean 
+	// state of each expression.
 
 	for (int i=0; i<exp_notes.getEventCount(); i++) {
 		MidiEvent* me = &exp_notes[i];
@@ -336,12 +392,13 @@ void ExpCreator::calculateVelocity(std::string option) {
 			}
 			valve_mf_on = false;
 
-		} else if ((exp_no == 15) || (exp_no == 112)) { // MF on, just update the start Time
+		} else if ((exp_no == 15) || (exp_no == 112)) {
+			// MF on, just update the start Time
 			if (!valve_mf_on) {    // if previous has an on, ignore
 				valve_mf_on = true;
 				valve_mf_starttime = st;
 			}
-		
+
 		} else if ((exp_no == 16) || (exp_no == 111)) {
 			if (valve_slowc_on) {
 				for (int j=starttime; j<st; j++) {
@@ -425,17 +482,16 @@ void ExpCreator::calculateVelocity(std::string option) {
 
 //////////////////////////////
 //
-// ExpCreator::printExpression --
+// Expressionizer::printExpression --
 //
 
-ostream& ExpCreator::printExpression(ostream& out) {
+ostream& Expressionizer::printExpression(ostream& out) {
 	int maxi = std::min(exp_bass.size(), exp_treble.size());
 	for (int i=0; i<maxi; i++) {
 		out << exp_bass[i] << "\t" << exp_treble[i] << endl;
 	}
 	return out;
 }
-
 
 
 

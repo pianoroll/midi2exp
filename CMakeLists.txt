@@ -50,7 +50,7 @@ set(SRCS
     src/midifile/MidiEventList.cpp
     src/midifile/MidiFile.cpp
     src/midifile/MidiMessage.cpp
-    src/ExpCreator.cpp
+    src/Expressionizer.cpp
 )
 
 set(HDRS
@@ -60,7 +60,7 @@ set(HDRS
     include/midifile/MidiFile.h
     include/midifile/MidiMessage.h
     include/midifile/Options.h
-    include/ExpCreator.h
+    include/Expressionizer.h
 )
 
 add_library(expression STATIC ${SRCS} ${HDRS})

@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(midi2exp C CXX)
+project(midi2exp CXX)
+
 set(CMAKE_CXX_STANDARD 11)
+
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(CheckIncludeFiles)
@@ -48,6 +50,7 @@ set(SRCS
     src/midifile/MidiEventList.cpp
     src/midifile/MidiFile.cpp
     src/midifile/MidiMessage.cpp
+    src/ExpCreator.cpp
 )
 
 set(HDRS
@@ -57,6 +60,7 @@ set(HDRS
     include/midifile/MidiFile.h
     include/midifile/MidiMessage.h
     include/midifile/Options.h
+    include/ExpCreator.h
 )
 
 add_library(expression STATIC ${SRCS} ${HDRS})

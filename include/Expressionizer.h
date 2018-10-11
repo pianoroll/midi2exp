@@ -49,12 +49,14 @@ class Expressionizer {
 		void          applyExpression             (std::string option);
 		double        getPreviousNonzero          (std::vector<double>& myArray,
 		                                           int start_index);
-
+		int           getAdjustedNoteEndTimeInMs  (smf::MidiEvent* me, 
+		                                           double hole_width = 21.5,
+		                                           double hole_fraction = 0.25);
 	private:
 
+		double welte_p            = 38.0;
 		double welte_mf           = 60.0;
 		double welte_f            = 85.0;
-		double welte_p            = 38.0;
 		double welte_loud         = 70.0;
 		double cresc_rate         = 1.0;
 

@@ -29,6 +29,10 @@ Expressionizer::Expressionizer(void) {
   	slow_step   =  cresc_rate * welte_mf            / slow_decay_rate;
   	fastC_step  =  cresc_rate * (welte_f - welte_p) / fastC_decay_rate;
   	fastD_step  = -cresc_rate * (welte_f - welte_p) / fastD_decay_rate;
+cerr << "CRESC_RATE " << cresc_rate << endl;
+cerr << "SLOW STEP " << slow_step << endl;
+cerr << "FASTC STEP " << fastC_step << endl;
+cerr << "FASTD STEP " << fastD_step << endl;
 }
 
 
@@ -352,6 +356,8 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 	// length of the MIDI file in milliseconds (plus an extra millisecond 
 	// to avoid problems):
 	int exp_length = midi_data.getFileDurationInSeconds() * 1000 + 1;
+
+
 	expression_list->resize(exp_length);
 
 	// set all of the times to piano by default:
@@ -369,8 +375,6 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 	int valve_mf_starttime    = 0;        // 0 for off
 	int valve_slowc_starttime = 0;
 
-	int starttime = 0;
-
 	// First pass: For each time section calculate the current boolean 
 	// state of each expression.
 
@@ -381,11 +385,12 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 		}
 		int exp_no = me->getKeyNumber();  // expression number
 		int st = int(me->seconds * 1000.0 + 0.5);  // start time in milliseconds
-		int et = int((me->seconds + me->getDurationInSeconds()) * 1000.0 + 0.5);  // end time in ms
+		int et = getAdjustedNoteEndTimeInMs(me);
 
-		if ((exp_no == 14) || (exp_no == 113)) {  // MF off
+		if ((exp_no == 14) || (exp_no == 113)) {
+			// MF off
 			if (valve_mf_on) {
-				for (int j=starttime; j<st; j++) {
+				for (int j=valve_mf_starttime; j<st; j++) {
 					// record MF Valve information for previous
 					isMF[j] = true;
 				}
@@ -401,7 +406,7 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 
 		} else if ((exp_no == 16) || (exp_no == 111)) {
 			if (valve_slowc_on) {
-				for (int j=starttime; j<st; j++) {
+				for (int j=valve_slowc_starttime; j<st; j++) {
 					// record Cresc Valve information for previous
 					isSlowC[j] = true;
 				}
@@ -436,8 +441,11 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 	double amount = 0.0;
 
 	for (int i=1; i<exp_length; i++) {
+cout << "exp[i-1] = " << expression_list->at(i-1);
+cout << "\t" << isSlowC[i] << ", " << isFastC[i] << ", " << isFastD[i];
 		if ((isSlowC[i] == false) && (isFastC[i] == false) && (isFastD[i] == false)) {
 			amount = -slow_step; // slow decrescendo is always on
+cout << "\tamountA = " << amount;
 
 		// if both slow crescendo and fast crescendo
 		//elif isSlowC[i] == 1 and isFastC[i] == 1:
@@ -445,23 +453,23 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 
 		} else {
 			amount = isSlowC[i] * slow_step + isFastC[i] * fastC_step + isFastD[i] * fastD_step;
+cout << "\tamountB = " << amount;
 		}
 
 		double newV = expression_list->at(i-1) + amount;
+cout << "\texp[i] = " << newV;
 		expression_list->at(i) = newV;
+cout << endl;
 
 		if (isMF[i]) {
-			// if it's increasing
-			if ((expression_list->at(i-1) > welte_mf) && (amount > 0)) {
+			if ((expression_list->at(i) > welte_mf) && (amount > 0)) {
 				// do nothing
-			} else if ((expression_list->at(i-1) > welte_mf) && (amount < 0)) {
+			} else if ((expression_list->at(i) > welte_mf) && (amount < 0)) {
 				expression_list->at(i) = std::max(welte_mf, expression_list->at(i));
-				//print 'clipping to not less than 60'
-			} else if ((expression_list->at(i-1) < welte_mf) && (amount < 0)) {
+			} else if ((expression_list->at(i) < welte_mf) && (amount < 0)) {
 				// do nothing
-			} else if ((expression_list->at(i-1) < welte_mf) && (amount > 0)) {
+			} else if ((expression_list->at(i) < welte_mf) && (amount > 0)) {
 				expression_list->at(i) = std::min(welte_mf, expression_list->at(i));
-				//print 'clipping to not greater than 60'
 			}
 		} else {
 			// new: adding loud
@@ -482,13 +490,33 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 
 //////////////////////////////
 //
+// Expressionizer::getAdjustedNoteEndTimeInMs -- Add an extra time value
+//   at the end of the note to emulate the cross-correlation widening of 
+//   the hole with the tracker bar hole width.
+// Default values (for red rolls):
+//     hole_width: 21.5 pixels (equal to 21.5 ticks in MIDI file).
+//     hole_width: 0.25 hole lengthening.
+//
+
+int Expressionizer::getAdjustedNoteEndTimeInMs(MidiEvent* me, 
+		double hole_width, double hole_fraction) {
+	double adjustment = hole_fraction * hole_width;
+	int endtick = int(me->tick + me->getTickDuration() + adjustment + 0.5);
+	double endtime = midi_data.getTimeInSeconds(endtick);
+	return int(endtime * 1000.0 + 0.5);
+}
+
+
+
+//////////////////////////////
+//
 // Expressionizer::printExpression --
 //
 
 ostream& Expressionizer::printExpression(ostream& out) {
 	int maxi = std::min(exp_bass.size(), exp_treble.size());
 	for (int i=0; i<maxi; i++) {
-		out << exp_bass[i] << "\t" << exp_treble[i] << endl;
+		out << i << "\t" << exp_bass[i] << "\t" << exp_treble[i] << endl;
 	}
 	return out;
 }

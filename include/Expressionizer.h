@@ -43,15 +43,20 @@ class Expressionizer {
 		void          addExpression        (void);
 		void          setPan               (void);
 
+		bool          applyTrackBarWidthCorrection(void);
+		void          updateMidiTimingInfo (void);
 
+		void          setPunchDiameter     (double value);
+		void          setPunchExtensionFraction(double value);
+		double        getPunchDiameter     (void);
+		double        getPunchExtensionFraction(void);
+
+		
 	protected:
 		void          calculateRedWelteExpression (std::string option);
 		void          applyExpression             (std::string option);
 		double        getPreviousNonzero          (std::vector<double>& myArray,
 		                                           int start_index);
-		int           getAdjustedNoteEndTimeInMs  (smf::MidiEvent* me, 
-		                                           double hole_width = 21.5,
-		                                           double hole_fraction = 0.25);
 	private:
 
 		double welte_p            = 38.0;
@@ -59,6 +64,11 @@ class Expressionizer {
 		double welte_f            = 85.0;
 		double welte_loud         = 70.0;
 		double cresc_rate         = 1.0;
+
+		double punch_width         = 21.5;  // diameter of the hole punches (in pixels/ticks)
+		double punch_fraction      = 0.25;  // extenion length of holes (0.25 = 25% longer)
+
+		bool trackbar_correction_done = false;
 
 		// left_adjust: reduce loudness of bass register (for attack velocities)
 		int left_adjust           = -15;
@@ -95,9 +105,15 @@ class Expressionizer {
 
 		// exp_bass: the model expression at every millisecond for bass register.
 		std::vector<double> exp_bass;
+		std::vector<double> isSlowC_bass;
+		std::vector<double> isFastC_bass;
+		std::vector<double> isFastD_bass;
 
 		// exp_treble: model expression at every millisecond for treble register.
 		std::vector<double> exp_treble;
+		std::vector<double> isSlowC_treble;
+		std::vector<double> isFastC_treble;
+		std::vector<double> isFastD_treble;
 
   		// 2.0 is some regulation, modified from table 4.1 from Peter's thesis
 		double slow_decay_rate  = 2380.0;

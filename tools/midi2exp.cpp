@@ -25,25 +25,34 @@ int main(int argc, char** argv) {
 	options.define("i|input=s:-",  "Input MIDI file name");
 	options.define("o|output=s:-", "Output MIDI file name");
 	options.define("e|print-expression=b", "print expression time values");
+	options.define("b|print-boolean-states=b", "print boolean states with expressions");
+	options.define("d|punch-diameter=d:21.5", "hole punch diameter in pixels at 300 dpi");
+	options.define("f|punch-fraction=d:0.25", "fraction of hole diameter to extend notes by to emulate tracker bar width");
+	options.define("a|adjust-hole-lengths=b", "adjust hole lengths to simulate tracker bar width");
 	options.process(argc, argv);
 
 	Expressionizer creator;
 
-	if (options.getString("input") == "-") {
+	creator.setPunchDiameter(options.getDouble("punch-diameter"));
+	creator.setPunchExtensionFraction(options.getDouble("punch-fraction"));
+
+	if (options.getArgCount() == 0) {
 		cerr << "Error: cannot read from standard input yet." << endl;
 		exit(1);
-	} else {
-		creator.readMidiFile(options.getString("input"));
+	}
+	if (options.getArgCount() >= 1) {
+		creator.readMidiFile(options.getArg(1));
+	}
+	if (options.getArgCount() < 2) {
+		cerr << "Error: cannot write to standard input yet." << endl;
+		exit(1);
+	}
+	if (options.getBoolean("adjust-hole-lengths")) {
+		creator.applyTrackBarWidthCorrection();
 	}
 
 	creator.addExpression();
-
-	if (options.getString("output") == "-") {
-		cerr << "Error: cannot write to standard output yet." << endl;
-		exit(1);
-	} else {
-		creator.writeMidiFile(options.getString("output"));
-	}
+	creator.writeMidiFile(options.getArg(2));
 
 	if (options.getBoolean("print-expression")) {
 		creator.printExpression(cout);

@@ -29,10 +29,10 @@ Expressionizer::Expressionizer(void) {
   	slow_step   =  cresc_rate * welte_mf            / slow_decay_rate;
   	fastC_step  =  cresc_rate * (welte_f - welte_p) / fastC_decay_rate;
   	fastD_step  = -cresc_rate * (welte_f - welte_p) / fastD_decay_rate;
-cerr << "CRESC_RATE " << cresc_rate << endl;
-cerr << "SLOW STEP " << slow_step << endl;
-cerr << "FASTC STEP " << fastC_step << endl;
-cerr << "FASTD STEP " << fastD_step << endl;
+	// cerr << "CRESC_RATE " << cresc_rate << endl;
+	// cerr << "SLOW STEP " << slow_step << endl;
+	// cerr << "FASTC STEP " << fastC_step << endl;
+	// cerr << "FASTD STEP " << fastD_step << endl;
 }
 
 
@@ -137,8 +137,20 @@ bool Expressionizer::readMidiFile(std::string filename) {
 	if (!status) {
 		return status;
 	}
+	updateMidiTimingInfo();
+	return true;
+}
+
+
+
+//////////////////////////////
+//
+// Expressionizer::updateMidiTimingInfo --
+//
+
+void Expressionizer::updateMidiTimingInfo(void) {
 	midi_data.doTimeAnalysis();
-	return status;
+	midi_data.linkNotePairs();
 }
 
 
@@ -340,14 +352,23 @@ double Expressionizer::getPreviousNonzero(vector<double>& myArray,
 void Expressionizer::calculateRedWelteExpression(std::string option) {
 	int track_index;
 	vector<double>* expression_list;
+	vector<double>* isSlowC;
+	vector<double>* isFastC;
+	vector<double>* isFastD;
 
 	// Initial Setup of the expression curve
 	if (option == "left_hand") {
 		track_index = bass_exp_track;
 		expression_list = &exp_bass;
+		isSlowC = &isSlowC_bass;
+		isFastC = &isFastC_bass;
+		isFastD = &isFastD_bass;
 	} else {
 		track_index = treble_exp_track;
 		expression_list = &exp_treble;
+		isSlowC = &isSlowC_treble;
+		isFastC = &isFastC_treble;
+		isFastD = &isFastD_treble;
 	}
 
 	// exp_notes = notes for the expessions being processed.
@@ -364,9 +385,13 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 	std::fill(expression_list->begin(), expression_list->end(), welte_p);
 
 	vector<bool> isMF(exp_length, false);    // setting up the upper/lower bound
-	vector<bool> isSlowC(exp_length, false); // is slow crescendo on?
-	vector<bool> isFastC(exp_length, false); // is fast crescendo on?
-	vector<bool> isFastD(exp_length, false); // is fast decrescendo on?
+
+	isSlowC->resize(exp_length);
+	isFastC->resize(exp_length);
+	isFastD->resize(exp_length);
+	std::fill(isSlowC->begin(), isSlowC->end(), false);  // is slow crescendo on?
+	std::fill(isFastC->begin(), isFastC->end(), false);  // is fast crescendo on?
+	std::fill(isFastD->begin(), isFastD->end(), false);  // is fast decrescendo on?
 
 	// Lock and Cancel
 	bool valve_mf_on    = false;
@@ -385,7 +410,7 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 		}
 		int exp_no = me->getKeyNumber();  // expression number
 		int st = int(me->seconds * 1000.0 + 0.5);  // start time in milliseconds
-		int et = getAdjustedNoteEndTimeInMs(me);
+		int et = int((me->seconds + me->getDurationInSeconds()) * 1000.0 + 0.5);
 
 		if ((exp_no == 14) || (exp_no == 113)) {
 			// MF off
@@ -408,7 +433,7 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 			if (valve_slowc_on) {
 				for (int j=valve_slowc_starttime; j<st; j++) {
 					// record Cresc Valve information for previous
-					isSlowC[j] = true;
+					isSlowC->at(j) = true;
 				}
 			}
 			valve_slowc_on = false;
@@ -422,12 +447,12 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 		// Fast Crescendo/Decrescendo is a direct operation (length of perforation matters)
 		} else if ((exp_no == 18) || (exp_no == 109)) { // Forzando off -- Fast Decrescendo
 				for (int j=st; j<et; j++) {
-					isFastD[j] = true;
+					isFastD->at(j) = true;
 				}
 
 		} else if ((exp_no == 19) || (exp_no == 108)) { // Forzando on -- Fast Crescendo
 				for (int j=st; j<et; j++) {
-					isFastC[j] = true;
+					isFastC->at(j) = true;
 				}
 		}
 	}
@@ -441,25 +466,19 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 	double amount = 0.0;
 
 	for (int i=1; i<exp_length; i++) {
-cout << "exp[i-1] = " << expression_list->at(i-1);
-cout << "\t" << isSlowC[i] << ", " << isFastC[i] << ", " << isFastD[i];
-		if ((isSlowC[i] == false) && (isFastC[i] == false) && (isFastD[i] == false)) {
+		if ((isSlowC->at(i) == false) && (isFastC->at(i) == false) && (isFastD->at(i) == false)) {
 			amount = -slow_step; // slow decrescendo is always on
-cout << "\tamountA = " << amount;
 
 		// if both slow crescendo and fast crescendo
-		//elif isSlowC[i] == 1 and isFastC[i] == 1:
+		//elif isSlowC->at(i) == 1 and isFastC->at(i) == 1:
 		//    amount = self.slow_step + self.fastC_step
 
 		} else {
-			amount = isSlowC[i] * slow_step + isFastC[i] * fastC_step + isFastD[i] * fastD_step;
-cout << "\tamountB = " << amount;
+			amount = isSlowC->at(i) * slow_step + isFastC->at(i) * fastC_step + isFastD->at(i) * fastD_step;
 		}
 
 		double newV = expression_list->at(i-1) + amount;
-cout << "\texp[i] = " << newV;
 		expression_list->at(i) = newV;
-cout << endl;
 
 		if (isMF[i]) {
 			if ((expression_list->at(i) > welte_mf) && (amount > 0)) {
@@ -474,7 +493,7 @@ cout << endl;
 		} else {
 			// new: adding loud
 			// slow crescendo will only reach welte_loud
-			if (isSlowC[i] && (isFastC[i] == false)) {
+			if (isSlowC->at(i) && (isFastC->at(i) == false)) {
 				expression_list->at(i) = min(expression_list->at(i), welte_loud);
 			}
 		}
@@ -490,36 +509,98 @@ cout << endl;
 
 //////////////////////////////
 //
-// Expressionizer::getAdjustedNoteEndTimeInMs -- Add an extra time value
-//   at the end of the note to emulate the cross-correlation widening of 
-//   the hole with the tracker bar hole width.
-// Default values (for red rolls):
-//     hole_width: 21.5 pixels (equal to 21.5 ticks in MIDI file).
-//     hole_width: 0.25 hole lengthening.
-//
-
-int Expressionizer::getAdjustedNoteEndTimeInMs(MidiEvent* me, 
-		double hole_width, double hole_fraction) {
-	double adjustment = hole_fraction * hole_width;
-	int endtick = int(me->tick + me->getTickDuration() + adjustment + 0.5);
-	double endtime = midi_data.getTimeInSeconds(endtick);
-	return int(endtime * 1000.0 + 0.5);
-}
-
-
-
-//////////////////////////////
-//
 // Expressionizer::printExpression --
 //
 
 ostream& Expressionizer::printExpression(ostream& out) {
 	int maxi = std::min(exp_bass.size(), exp_treble.size());
 	for (int i=0; i<maxi; i++) {
-		out << i << "\t" << exp_bass[i] << "\t" << exp_treble[i] << endl;
+		out << i << "\t" << exp_bass[i];
+		out << "\t" << isSlowC_bass[i];
+		out << "\t" << isFastC_bass[i];
+		out << "\t" << isFastD_bass[i];
+		out << "\t" << exp_treble[i];
+		out << "\t" << isSlowC_bass[i];
+		out << "\t" << isFastC_bass[i];
+		out << "\t" << isFastD_bass[i];
+		out << endl;
 	}
 	return out;
 }
 
+
+
+//////////////////////////////
+//
+// Expressionizer::applyTrackBarWidthCorrection --
+//
+
+bool Expressionizer::applyTrackBarWidthCorrection(void) {
+	if (midi_data.getTrackCount() < 2) {
+		cerr << "Error: no MIDI data to correct" << endl;
+		return false;
+	}
+	if (trackbar_correction_done) {
+		cerr << "Error: you already did the correction, so not doing it again." << endl;
+		return false;
+	}
+
+	int correction = int(getPunchDiameter() * getPunchExtensionFraction() + 0.5);
+	for (int i=0; i<midi_data.getTrackCount(); i++) {
+		for (int j=0; j<midi_data[i].getEventCount(); j++) {
+			if (!midi_data[i][j].isNoteOff()) {
+				continue;
+			}
+			midi_data[i][j].tick += correction;
+		}
+	}
+
+	midi_data.sortTracks();
+   updateMidiTimingInfo();
+	trackbar_correction_done = true;
+	return true;
+}
+
+
+
+///////////////////////////////
+//
+// Epressionizer::setPunchDiameter --
+//
+
+void Expressionizer::setPunchDiameter(double value) {
+	punch_width = value;
+}
+
+
+
+///////////////////////////////
+//
+// Epressionizer::
+//
+void Expressionizer::setPunchExtensionFraction(double value) {
+	punch_fraction = value;
+}
+
+
+
+///////////////////////////////
+//
+// Epressionizer::
+//
+double Expressionizer::getPunchDiameter(void) {
+	return punch_width;
+}
+
+
+
+///////////////////////////////
+//
+// Epressionizer::
+//
+
+double Expressionizer::getPunchExtensionFraction(void) {
+	return punch_fraction;
+}
 
 

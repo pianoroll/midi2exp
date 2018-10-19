@@ -318,8 +318,8 @@ class ExpCreator(object):
         # First pass: For each time section calculate the current boolean state of each expression
         for currE in my_exp:
             exp_no = currE.pitch # expression number
-            st = int(currE.start * 1000)
-            et = int(currE.end * 1000)
+            st = int(round(currE.start * 1000))
+            et = int(round(currE.end * 1000))
 
             if exp_no == 14 or exp_no == 113:       # MF off
                 if Valve_MF_On:

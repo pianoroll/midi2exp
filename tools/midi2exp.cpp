@@ -25,6 +25,7 @@ int main(int argc, char** argv) {
 	options.define("i|input=s:-",  "Input MIDI file name");
 	options.define("o|output=s:-", "Output MIDI file name");
 	options.define("e|print-expression=b", "print expression time values");
+	options.define("r|remove-expression-tracks=b", "remove expression tracks");
 	options.define("b|print-boolean-states=b", "print boolean states with expressions");
 	options.define("d|punch-diameter=d:21.5", "hole punch diameter in pixels at 300 dpi");
 	options.define("f|punch-fraction=d:0.25", "fraction of hole diameter to extend notes by to emulate tracker bar width");
@@ -35,6 +36,9 @@ int main(int argc, char** argv) {
 
 	creator.setPunchDiameter(options.getDouble("punch-diameter"));
 	creator.setPunchExtensionFraction(options.getDouble("punch-fraction"));
+	if (options.getBoolean("remove-expression-tracks")) {
+		creator.removeExpressionTracksOnWrite();
+	}
 
 	if (options.getArgCount() == 0) {
 		cerr << "Error: cannot read from standard input yet." << endl;

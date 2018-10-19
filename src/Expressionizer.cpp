@@ -161,6 +161,11 @@ void Expressionizer::updateMidiTimingInfo(void) {
 //
 
 bool Expressionizer::writeMidiFile(std::string filename) {
+	if ((midi_data.getTrackCount() == 5) && delete_expresison_tracks) {
+		midi_data.deleteTrack(4);
+		midi_data.deleteTrack(3);
+	}
+
 	return midi_data.write(filename);
 }
 
@@ -576,7 +581,7 @@ void Expressionizer::setPunchDiameter(double value) {
 
 ///////////////////////////////
 //
-// Epressionizer::
+// Epressionizer::setPunchExtensionFraction --
 //
 void Expressionizer::setPunchExtensionFraction(double value) {
 	punch_fraction = value;
@@ -586,7 +591,7 @@ void Expressionizer::setPunchExtensionFraction(double value) {
 
 ///////////////////////////////
 //
-// Epressionizer::
+// Epressionizer::getPunchDiameter --
 //
 double Expressionizer::getPunchDiameter(void) {
 	return punch_width;
@@ -596,11 +601,23 @@ double Expressionizer::getPunchDiameter(void) {
 
 ///////////////////////////////
 //
-// Epressionizer::
+// Epressionizer::getPunchExtensionFraction --
 //
 
 double Expressionizer::getPunchExtensionFraction(void) {
 	return punch_fraction;
 }
+
+
+
+///////////////////////////////
+//
+// Epressionizer::removeExpressionTracksOnWrite --
+//
+
+void Expressionizer::removeExpressionTracksOnWrite(void) {
+	delete_expresison_tracks = true;
+}
+
 
 

@@ -50,6 +50,7 @@ class Expressionizer {
 		void          setPunchExtensionFraction(double value);
 		double        getPunchDiameter     (void);
 		double        getPunchExtensionFraction(void);
+		void          removeExpressionTracksOnWrite(void);
 
 		
 	protected:
@@ -69,6 +70,7 @@ class Expressionizer {
 		double punch_fraction      = 0.25;  // extenion length of holes (0.25 = 25% longer)
 
 		bool trackbar_correction_done = false;
+		bool delete_expresison_tracks = false;
 
 		// left_adjust: reduce loudness of bass register (for attack velocities)
 		int left_adjust           = -15;

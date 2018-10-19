@@ -32,26 +32,26 @@
 class Expressionizer {
 
 	public:
-		              Expressionizer           (void);
-		             ~Expressionizer           (void);
+		              Expressionizer               (void);
+		             ~Expressionizer               (void);
 
-		bool          readMidiFile         (std::string filename);
-		bool          writeMidiFile        (std::string filename);
+		bool          readMidiFile                 (std::string filename);
+		bool          writeMidiFile                (std::string filename);
 
-		std::ostream& printExpression      (std::ostream& out);
+		std::ostream& printExpression              (std::ostream& out, bool extended = false);
 
-		void          addExpression        (void);
-		void          setPan               (void);
+		void          addExpression                (void);
+		void          setPan                       (void);
 
-		bool          applyTrackBarWidthCorrection(void);
-		void          updateMidiTimingInfo (void);
+		bool          applyTrackBarWidthCorrection (void);
+		void          updateMidiTimingInfo         (void);
 
-		void          setPunchDiameter     (double value);
-		void          setPunchExtensionFraction(double value);
-		double        getPunchDiameter     (void);
-		double        getPunchExtensionFraction(void);
+		void          setPunchDiameter             (double value);
+		void          setPunchExtensionFraction    (double value);
+		double        getPunchDiameter             (void);
+		double        getPunchExtensionFraction    (void);
 		void          removeExpressionTracksOnWrite(void);
-
+		bool          setPianoTimbre               (void);
 		
 	protected:
 		void          calculateRedWelteExpression (std::string option);

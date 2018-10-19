@@ -112,13 +112,13 @@ void Expressionizer::setPan(void) {
 	int tick = 0;
 
 	if (bass_event) {
-		bass_event->setP1(pan_bass);
+		bass_event->setP2(pan_bass);
 	} else {
 		midi_data.addController(bass_track, tick, bass_ch, pan_cont_num, pan_bass);
 	}
 
 	if (treble_event) {
-		treble_event->setP1(pan_treble);
+		treble_event->setP2(pan_treble);
 	} else {
 		midi_data.addController(treble_track, tick, treble_ch, pan_cont_num, pan_treble);
 	}
@@ -517,17 +517,21 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 // Expressionizer::printExpression --
 //
 
-ostream& Expressionizer::printExpression(ostream& out) {
+ostream& Expressionizer::printExpression(ostream& out, bool extended) {
 	int maxi = std::min(exp_bass.size(), exp_treble.size());
 	for (int i=0; i<maxi; i++) {
 		out << i << "\t" << exp_bass[i];
-		out << "\t" << isSlowC_bass[i];
-		out << "\t" << isFastC_bass[i];
-		out << "\t" << isFastD_bass[i];
+		if (extended) {
+			out << "\t" << isSlowC_bass[i];
+			out << "\t" << isFastC_bass[i];
+			out << "\t" << isFastD_bass[i];
+		}
 		out << "\t" << exp_treble[i];
-		out << "\t" << isSlowC_bass[i];
-		out << "\t" << isFastC_bass[i];
-		out << "\t" << isFastD_bass[i];
+		if (extended) {
+			out << "\t" << isSlowC_bass[i];
+			out << "\t" << isFastC_bass[i];
+			out << "\t" << isFastD_bass[i];
+		}
 		out << endl;
 	}
 	return out;
@@ -570,7 +574,7 @@ bool Expressionizer::applyTrackBarWidthCorrection(void) {
 
 ///////////////////////////////
 //
-// Epressionizer::setPunchDiameter --
+// Expressionizer::setPunchDiameter --
 //
 
 void Expressionizer::setPunchDiameter(double value) {
@@ -581,7 +585,7 @@ void Expressionizer::setPunchDiameter(double value) {
 
 ///////////////////////////////
 //
-// Epressionizer::setPunchExtensionFraction --
+// Expressionizer::setPunchExtensionFraction --
 //
 void Expressionizer::setPunchExtensionFraction(double value) {
 	punch_fraction = value;
@@ -591,7 +595,7 @@ void Expressionizer::setPunchExtensionFraction(double value) {
 
 ///////////////////////////////
 //
-// Epressionizer::getPunchDiameter --
+// Expressionizer::getPunchDiameter --
 //
 double Expressionizer::getPunchDiameter(void) {
 	return punch_width;
@@ -601,7 +605,7 @@ double Expressionizer::getPunchDiameter(void) {
 
 ///////////////////////////////
 //
-// Epressionizer::getPunchExtensionFraction --
+// Expressionizer::getPunchExtensionFraction --
 //
 
 double Expressionizer::getPunchExtensionFraction(void) {
@@ -612,11 +616,70 @@ double Expressionizer::getPunchExtensionFraction(void) {
 
 ///////////////////////////////
 //
-// Epressionizer::removeExpressionTracksOnWrite --
+// Expressionizer::removeExpressionTracksOnWrite --
 //
 
 void Expressionizer::removeExpressionTracksOnWrite(void) {
 	delete_expresison_tracks = true;
+}
+
+
+
+///////////////////////////////
+//
+// Expressionizer::setPianoTimbre -- Add a piano patch change
+//   to the start of tracks 1 and 2 (or update it to piano if
+//   there already is a patch change anywhere in the track).
+//
+
+bool Expressionizer::setPianoTimbre(void) {
+	MidiEvent* timbre1 = NULL;
+	MidiEvent* timbre2 = NULL;
+	for (int i=0; i<midi_data[1].getEventCount(); i++) {
+		if (midi_data[1][i].isTimbre()) {
+			timbre1 = &midi_data[1][i];
+		}
+	}
+
+	for (int i=0; i<midi_data[2].getEventCount(); i++) {
+		if (midi_data[2][i].isTimbre()) {
+			timbre2 = &midi_data[2][i];
+		}
+	}
+
+	if (midi_data.getTrackCount() < 3) {
+		cerr << "Error: not enough tracks in MIDI file: " << midi_data.getTrackCount() << endl;
+		return false;
+	}
+
+	bool sortQ = false;
+	int track;
+	int channel;
+	int tick = 0;
+	int timbre = 0;
+	if (timbre1) {
+		timbre1->setP2(timbre);
+	} else {
+		track = 1;
+		channel = 1;
+		midi_data.addTimbre(track, tick, channel, timbre);
+		sortQ = true;
+	}
+
+	if (timbre2) {
+		timbre2->setP2(timbre);
+	} else {
+		track = 2;
+		channel = 2;
+		midi_data.addTimbre(track, tick, channel, timbre);
+		sortQ = true;
+	}
+
+	if (sortQ) {
+		midi_data.sortTracks();
+	}
+
+	return true;
 }
 
 

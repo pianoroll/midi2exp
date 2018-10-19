@@ -22,14 +22,13 @@ using namespace smf;
 
 int main(int argc, char** argv) {
 	Options options;
-	options.define("i|input=s:-",  "Input MIDI file name");
-	options.define("o|output=s:-", "Output MIDI file name");
-	options.define("e|print-expression=b", "print expression time values");
-	options.define("r|remove-expression-tracks=b", "remove expression tracks");
+	options.define("a|adjust-hole-lengths=b", "adjust hole lengths to simulate tracker bar width");
 	options.define("b|print-boolean-states=b", "print boolean states with expressions");
 	options.define("d|punch-diameter=d:21.5", "hole punch diameter in pixels at 300 dpi");
+	options.define("e|print-expression=b", "print expression time values");
 	options.define("f|punch-fraction=d:0.25", "fraction of hole diameter to extend notes by to emulate tracker bar width");
-	options.define("a|adjust-hole-lengths=b", "adjust hole lengths to simulate tracker bar width");
+	options.define("r|remove-expression-tracks=b", "remove expression tracks");
+	options.define("x|display-extended-expression-info=b", "display booleans needed to create expression");
 	options.process(argc, argv);
 
 	Expressionizer creator;
@@ -56,10 +55,11 @@ int main(int argc, char** argv) {
 	}
 
 	creator.addExpression();
+	creator.setPianoTimbre();
 	creator.writeMidiFile(options.getArg(2));
 
 	if (options.getBoolean("print-expression")) {
-		creator.printExpression(cout);
+		creator.printExpression(cout, options.getBoolean("display-extended-expression-info"));
 	}
 
 	return 0;

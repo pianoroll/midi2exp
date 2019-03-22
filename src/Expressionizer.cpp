@@ -2,7 +2,7 @@
 // Programmer:    Kitty Shi
 // Programmer:    Craig Stuart Sapp (translation to C++)
 // Creation Date: Thu Oct  4 16:32:27 PDT 2018
-// Last Modified: Fri Oct  5 00:25:41 PDT 2018
+// Last Modified: Fri Mar 22 16:25:41 PDT 2018
 // Filename:      midi2exp/src/Expressionizer.cpp
 // Website:       https://github.com/pianoroll/midi2exp
 // Syntax:        C++11
@@ -68,6 +68,15 @@ void Expressionizer::addExpression(void) {
 }
 
 
+//////////////////////////////
+//
+// Expressionizer::setRollTempo -- Set the tempo of the roll
+// input: tempo (98.4252 for red welte), (default 300 dpi, 6 as multiplier)
+//
+void Expressionizer::setRollTempo(double tempo) {
+	midi_data.setTPQ(int(tempo * 6 + 0.5));
+	updateMidiTimingInfo();
+}
 
 //////////////////////////////
 //
@@ -320,7 +329,7 @@ double Expressionizer::getPreviousNonzero(vector<double>& myArray,
 //
 // Expressionizer::calculateRedWelteExpression --
 //
-//		As of 2018-04-06, some modification (F: fast crescendo -- length 
+//		As of 2018-04-06, some modification (F: fast crescendo -- length
 //    of perforation) (F+slow crescendo: fastest crescendo)
 //		Using Peter's velocity mapping: min30 MF60 Loud70 Max85
 //		dynamic range default 1.2, making welte_mf: 80, Max (F): 96, and Min (P) 66
@@ -379,7 +388,7 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 	// exp_notes = notes for the expessions being processed.
 	MidiEventList& exp_notes = midi_data[track_index];
 
-	// length of the MIDI file in milliseconds (plus an extra millisecond 
+	// length of the MIDI file in milliseconds (plus an extra millisecond
 	// to avoid problems):
 	int exp_length = midi_data.getFileDurationInSeconds() * 1000 + 1;
 
@@ -405,7 +414,7 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 	int valve_mf_starttime    = 0;        // 0 for off
 	int valve_slowc_starttime = 0;
 
-	// First pass: For each time section calculate the current boolean 
+	// First pass: For each time section calculate the current boolean
 	// state of each expression.
 
 	for (int i=0; i<exp_notes.getEventCount(); i++) {

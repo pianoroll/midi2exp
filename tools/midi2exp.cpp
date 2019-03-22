@@ -2,7 +2,7 @@
 // Programmer:    Kitty Shi
 // Programmer:    Craig Stuart Sapp
 // Creation Date: Tue Jun 19 16:15:12 PDT 2018
-// Last Modified: Thu Oct  4 17:15:42 PDT 2018
+// Last Modified: Fri Mar 22 17:15:42 PDT 2018
 // Filename:      midi2exp/tools/midi2exp.cpp
 // Website:       https://github.com/pianoroll/midi2exp
 // Syntax:        C++11
@@ -28,6 +28,8 @@ int main(int argc, char** argv) {
 	options.define("e|print-expression=b", "print expression time values");
 	options.define("f|punch-fraction=d:0.25", "fraction of hole diameter to extend notes by to emulate tracker bar width");
 	options.define("r|remove-expression-tracks=b", "remove expression tracks");
+	options.define("t|tempo=d:100", "tempo adjustment for pianoroll file");
+	options.define("w|red-welte=b:", "set tempo for red welte rolls");
 	options.define("x|display-extended-expression-info=b", "display booleans needed to create expression");
 	options.process(argc, argv);
 
@@ -45,6 +47,12 @@ int main(int argc, char** argv) {
 	}
 	if (options.getArgCount() >= 1) {
 		creator.readMidiFile(options.getArg(1));
+	}
+	if (options.getBoolean("red-welte")) {
+		creator.setRollTempo(98.4252);
+	}
+	else if (options.getBoolean("tempo")) {
+		creator.setRollTempo(options.getDouble("tempo"));
 	}
 	if (options.getArgCount() < 2) {
 		cerr << "Error: cannot write to standard input yet." << endl;

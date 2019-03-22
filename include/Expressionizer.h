@@ -14,7 +14,7 @@
 //    vel_mid: middle velocity (what velocity value maps to an MF)
 //    dynamic_range: default 1.2, mapping maximum 96, and minimum 66
 //    left_adjust: how much less you want left hand to be, default 15
-//    time_scale: speed adjustment, default 1, smaller means faster 
+//    time_scale: speed adjustment, default 1, smaller means faster
 //    (new duration = old duration * time_scale)
 //    name_ext: the extention name, default .mid
 //    pan_bass: how much of the panning to the left, default 52
@@ -46,13 +46,14 @@ class Expressionizer {
 		bool          applyTrackBarWidthCorrection (void);
 		void          updateMidiTimingInfo         (void);
 
+		void          setRollTempo	               (double value);
 		void          setPunchDiameter             (double value);
 		void          setPunchExtensionFraction    (double value);
 		double        getPunchDiameter             (void);
 		double        getPunchExtensionFraction    (void);
 		void          removeExpressionTracksOnWrite(void);
 		bool          setPianoTimbre               (void);
-		
+
 	protected:
 		void          calculateRedWelteExpression (std::string option);
 		void          applyExpression             (std::string option);
@@ -73,7 +74,7 @@ class Expressionizer {
 		bool delete_expresison_tracks = false;
 
 		// left_adjust: reduce loudness of bass register (for attack velocities)
-		int left_adjust           = -15;
+		int left_adjust           = -10;
 
 		double time_scale         = 1.0;
 

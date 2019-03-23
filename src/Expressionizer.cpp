@@ -2,7 +2,7 @@
 // Programmer:    Kitty Shi
 // Programmer:    Craig Stuart Sapp (translation to C++)
 // Creation Date: Thu Oct  4 16:32:27 PDT 2018
-// Last Modified: Fri Mar 22 16:25:41 PDT 2018
+// Last Modified: Fri Mar 22 16:25:41 PDT 2019
 // Filename:      midi2exp/src/Expressionizer.cpp
 // Website:       https://github.com/pianoroll/midi2exp
 // Syntax:        C++11
@@ -26,13 +26,30 @@ using namespace smf;
 //
 
 Expressionizer::Expressionizer(void) {
-  	slow_step   =  cresc_rate * welte_mf            / slow_decay_rate;
-  	fastC_step  =  cresc_rate * (welte_f - welte_p) / fastC_decay_rate;
-  	fastD_step  = -cresc_rate * (welte_f - welte_p) / fastD_decay_rate;
+	setupRedWelte();  // default setup is for Red Welte rolls.
+}
+
+
+
+//////////////////////////////
+//
+// Expressionizer::setupRedWelte -- Prepare constants for Red Welte rolls.
+//
+
+void Expressionizer::setupRedWelte(void) {
+	slow_step   =  cresc_rate * welte_mf            / slow_decay_rate;
+	fastC_step  =  cresc_rate * (welte_f - welte_p) / fastC_decay_rate;
+	fastD_step  = -cresc_rate * (welte_f - welte_p) / fastD_decay_rate;
 	// cerr << "CRESC_RATE " << cresc_rate << endl;
 	// cerr << "SLOW STEP " << slow_step << endl;
 	// cerr << "FASTC STEP " << fastC_step << endl;
 	// cerr << "FASTD STEP " << fastD_step << endl;
+
+	// expression keys for Red Welte rolls:
+	PedalOnKey     = 106;
+	PedalOffKey    = 107;
+	SoftOnKey      = 21;
+	SoftOffKey     = 20;
 }
 
 
@@ -62,44 +79,56 @@ void Expressionizer::addExpression(void) {
 	applyExpression("left_hand");
 	applyExpression("right_hand");
 
-	addSustainPedalling(midi_data, TREBLE_EXPRESSION);
-	addSoftPedalling(midi_data, BASS_EXPRESSION);
+	addSustainPedalling(treble_exp_track, PedalOnKey, PedalOffKey);
+	addSoftPedalling(bass_exp_track, SoftOnKey, SoftOffKey);
 }
 
 
 
 //////////////////////////////
 //
-// Expressionizer::addSustainPedalling --
+// Expressionizer::addSustainPedalling -- Extract sustain pedal information
+//    from the expression track and insert sustain pedalling into the
+//    bass and treble note channels/tracks.
 //
 
-void Expressionizer::addSustainPedalling(MidiFile& midifile, int sourcetrack) {
-	int count = midifile.getEventCount(sourcetrack);
-	MidiEvent me_bass;
-	MidiEvent me_treble;
-	me_bass.track = 1;
-	me_treble.track = 2;
+void Expressionizer::addSustainPedalling(int sourcetrack, int onkey, int offkey) {
+	MidiFile& midifile = midi_data;
+	const int pedal_controller = 64;  // sustain pedal
+
+	bool hascontroller = hasControllerInTrack(bass_track, pedal_controller);
+	if (hascontroller) {
+		cerr << "Warning: Bass track already contains sustain pedalling." << endl;
+		return;
+	}
+
+	hascontroller = hasControllerInTrack(treble_track, pedal_controller);
+	if (hascontroller) {
+		cerr << "Warning: Treble track already contains sustain pedalling." << endl;
+		return;
+	}
+
+	// Search through the track for notes that represent pedal on or pedal off.
+	// The sustain pedal needs to be duplicated to be added to both the bass
+	// track/channel and the treble track/channel.
+	int tick;
+	MidiEventList& events = midifile[sourcetrack];
+	int count = events.getEventCount();
 	for (int i=0; i<count; i++) {
-		if (!midifile[sourcetrack][i].isNoteOn()) {
+		if (!events[i].isNoteOn()) {
 			continue;
 		}
-		int key = midifile[sourcetrack][i].getKeyNumber();
-		me_bass.tick = midifile[sourcetrack][i].tick;
-		me_treble.tick = midifile[sourcetrack][i].tick;
-		if (key == PedalOnKey) {
-			me_bass.makeController(1, 64, 127);
-			midifile.addEvent(me_bass);
-			me_treble.makeController(2, 64, 127);
-			midifile.addEvent(me_treble);
-		} else if (key == PedalOffKey) {
-			me_bass.makeController(1, 64, 0);
-			midifile.addEvent(me_bass);
-			me_treble.makeController(2, 64, 0);
-			midifile.addEvent(me_treble);
+		int key = events[i].getKeyNumber();
+		tick = events[i].tick;
+		if (key == onkey) {
+			midifile.addController(bass_track,   tick, bass_ch,   pedal_controller, 127);
+			midifile.addController(treble_track, tick, treble_ch, pedal_controller, 127);
+		} else if (key == offkey) {
+			midifile.addController(bass_track,   tick, bass_ch,   pedal_controller, 127);
+			midifile.addController(treble_track, tick, treble_ch, pedal_controller, 127);
 		}
 	}
 	midifile.sortTracks();
-
 }
 
 
@@ -109,31 +138,66 @@ void Expressionizer::addSustainPedalling(MidiFile& midifile, int sourcetrack) {
 // Expressionizer::addSoftPedalling --
 //
 
-void Expressionizer::addSoftPedalling(MidiFile& midifile, int sourcetrack) {
-	int count = midifile.getEventCount(sourcetrack);
-	MidiEvent me_bass;
-	MidiEvent me_treble;
-	me_bass.track = 1;
-	me_treble.track = 2;
+void Expressionizer::addSoftPedalling(int sourcetrack, int onkey, int offkey) {
+	MidiFile& midifile = midi_data;
+	const int pedal_controller = 67;  // soft pedal
+
+	bool hascontroller = hasControllerInTrack(bass_track, pedal_controller);
+	if (hascontroller) {
+		cerr << "Warning: Bass track already contains soft pedalling." << endl;
+		return;
+	}
+
+	hascontroller = hasControllerInTrack(treble_track, pedal_controller);
+	if (hascontroller) {
+		cerr << "Warning: Treble track already contains soft pedalling." << endl;
+		return;
+	}
+
+	int tick;
+	MidiEventList& events = midifile[sourcetrack];
+	int count = events.getEventCount();
 	for (int i=0; i<count; i++) {
-		if (!midifile[sourcetrack][i].isNoteOn()) {
+		if (!events[i].isNoteOn()) {
 			continue;
 		}
-		int key = midifile[sourcetrack][i].getKeyNumber();
-		me_bass.tick = midifile[sourcetrack][i].tick;
+		int key = events[i].getKeyNumber();
+		tick = events[i].tick;
 		if (key == SoftOnKey) {
-			me_bass.makeController(1, 67, 127);
-			midifile.addEvent(me_bass);
-			me_treble.makeController(2, 67, 127);
-			midifile.addEvent(me_treble);
+			midifile.addController(bass_track,   tick, bass_ch,   pedal_controller, 127);
+			midifile.addController(treble_track, tick, treble_ch, pedal_controller, 127);
 		} else if (key == SoftOffKey) {
-			me_bass.makeController(1, 67, 0);
-			midifile.addEvent(me_bass);
-			me_treble.makeController(2, 67, 0);
-			midifile.addEvent(me_treble);
+			midifile.addController(bass_track,   tick, bass_ch,   pedal_controller, 0);
+			midifile.addController(treble_track, tick, treble_ch, pedal_controller, 0);
 		}
 	}
 	midifile.sortTracks();
+}
+
+
+
+//////////////////////////////
+//
+// Expressionizer::hasControllerInTrack -- Returns true if there is a MIDI
+//    message in the given track number that is a controller message, where
+//    the "controller" parameter is the controller number (such as 64 which
+//    is the General MIDI controller number for sustain pedal).
+//
+
+bool Expressionizer::hasControllerInTrack(int track, int controller) {
+	MidiEventList& events = midi_data[track];
+	int count = events.getEventCount();
+	MidiEvent* me;
+	for (int i=0; i<count; i++) {
+		me = &events[i];
+		if (!me->isController()) {
+			continue;
+		}
+		if (me->getP1() == controller) {
+			return true;
+		}
+	}
+	return false;
 }
 
 
@@ -147,6 +211,8 @@ void Expressionizer::setRollTempo(double tempo) {
 	midi_data.setTPQ(int(tempo * 6 + 0.5));
 	updateMidiTimingInfo();
 }
+
+
 
 //////////////////////////////
 //
@@ -247,65 +313,6 @@ bool Expressionizer::writeMidiFile(std::string filename) {
 
 	return midi_data.write(filename);
 }
-
-
-
-
-/*  Probably already in input MIDI file:
-
-	def addPedal(self):
-		// adding soft pedal
-		softOn = 0.0
-		softOff = 0.0
-
-		// add soft pedal
-		for note in self.bass_exp.notes:
-			if note.pitch == 21:
-				if softOff != 0.0:
-					print 'Warning! previous soft pedal not off before ' + str(note.start)
-				softOff = 0.0
-				softOn = note.start
-			elif note.pitch == 20:
-				//if softOn == 0.0:
-				//    print "Warning no soft pedal on detected before " + str(note.start)
-				softOff = note.end
-				//print 'soft pedal on from: ' + str(softOn) + ' to: ' + str(softOff)
-				softControlOn = pretty_midi.ControlChange(67,70,softOn)
-				softControlOff = pretty_midi.ControlChange(67,0,softOff)
-				self.left.control_changes.append(softControlOn)
-				self.left.control_changes.append(softControlOff)
-				self.right.control_changes.append(softControlOn)
-				self.right.control_changes.append(softControlOff)
-
-				softOn = 0.0
-				softOff = 0.0
-
-
-		// add sustainPedal
-		pedalOn = 0.0
-		pedalOff = 0.0
-
-		for note in self.treble_exp.notes:
-			if note.pitch == 106:
-				//if pedalOff != 0.0:
-				//    print 'Warning! previous sustain pedal not off before ' + str(note.start)
-				pedalOff = 0.0
-				pedalOn = note.start
-			elif note.pitch == 107:
-				//if pedalOn == 0.0:
-				//    print "Warning no sustain pedal on detected before " + str(note.start)
-				pedalOff = note.end
-				sustainControlOn = pretty_midi.ControlChange(64,70,pedalOn)
-				sustainControlOff = pretty_midi.ControlChange(64,0,pedalOff)
-				self.left.control_changes.append(sustainControlOn)
-				self.left.control_changes.append(sustainControlOff)
-				self.right.control_changes.append(sustainControlOn)
-				self.right.control_changes.append(sustainControlOff)
-
-				pedalOn = 0.0
-				pedalOff = 0.0
-
-*/
 
 
 
@@ -629,7 +636,7 @@ bool Expressionizer::applyTrackBarWidthCorrection(void) {
 	}
 
 	midi_data.sortTracks();
-   updateMidiTimingInfo();
+	updateMidiTimingInfo();
 	trackbar_correction_done = true;
 	return true;
 }

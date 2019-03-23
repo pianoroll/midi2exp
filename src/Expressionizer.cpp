@@ -62,18 +62,18 @@ void Expressionizer::addExpression(void) {
 	applyExpression("left_hand");
 	applyExpression("right_hand");
 
-	addSustainPedalling(midifile, TREBLE_EXPRESSION);
-	addSoftPedalling(midifile, BASS_EXPRESSION);
+	addSustainPedalling(midi_data, TREBLE_EXPRESSION);
+	addSoftPedalling(midi_data, BASS_EXPRESSION);
 }
 
 
 
 //////////////////////////////
 //
-// addSustainPedalling --
+// Expressionizer::addSustainPedalling --
 //
 
-void addSustainPedalling(MidiFile& midifile, int sourcetrack) {
+void Expressionizer::addSustainPedalling(MidiFile& midifile, int sourcetrack) {
 	int count = midifile.getEventCount(sourcetrack);
 	MidiEvent me_bass;
 	MidiEvent me_treble;
@@ -99,16 +99,17 @@ void addSustainPedalling(MidiFile& midifile, int sourcetrack) {
 		}
 	}
 	midifile.sortTracks();
+
 }
 
 
 
 //////////////////////////////
 //
-// addSoftPedalling --
+// Expressionizer::addSoftPedalling --
 //
 
-void addSoftPedalling(MidiFile& midifile, int sourcetrack) {
+void Expressionizer::addSoftPedalling(MidiFile& midifile, int sourcetrack) {
 	int count = midifile.getEventCount(sourcetrack);
 	MidiEvent me_bass;
 	MidiEvent me_treble;

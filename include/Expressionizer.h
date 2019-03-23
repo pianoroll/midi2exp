@@ -54,10 +54,8 @@ class Expressionizer {
 		void          removeExpressionTracksOnWrite(void);
 		bool          setPianoTimbre               (void);
 
-		void    addSustainPedalling (MidiFile& midifile, int sourcetrack,
-                             int targettrack);
-		void    addSoftPedalling    (MidiFile& midifile, int sourcetrack,
-                             int targettrack);
+		void    addSustainPedalling (smf::MidiFile& midifile, int sourcetrack);
+		void    addSoftPedalling    (smf::MidiFile& midifile, int sourcetrack);
 
 	protected:
 		void          calculateRedWelteExpression (std::string option);
@@ -92,6 +90,11 @@ class Expressionizer {
 		int    TREBLE_EXPRESSION  = 4;
 		int    BASS_EXPRESSION    = 3;
 
+		int    PedalOnKey         = 106;
+		int    PedalOffKey        = 107;
+		int    SoftOnKey          = 21;
+		int    SoftOffKey         = 20;     // for red rolls
+
 		bool   read_pedal         = true;
 
 		// midi_data: store of the input/output MIDI data file:
@@ -107,8 +110,8 @@ class Expressionizer {
 		// MIDI channels for each component of the input MIDI data:
 		int bass_ch          = 1; // channel number of bass register notes
 		int treble_ch        = 2; // channel number of treble register notes
-		int bass_exp_ch      = 3; // channel number of bass notes expression
-		int treble_exp_ch    = 4; // channel number of treble notes expression
+		int bass_exp_ch      = 0; // channel number of bass notes expression
+		int treble_exp_ch    = 3; // channel number of treble notes expression
 
 		double slow_step     = -1000;
   		double fastC_step    = -1000;

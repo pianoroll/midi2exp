@@ -2,7 +2,7 @@
 // Programmer:    Kitty Shi
 // Programmer:    Craig Stuart Sapp (translation to C++)
 // Creation Date: Thu Oct  4 16:32:27 PDT 2018
-// Last Modified: Fri Oct  5 00:25:41 PDT 2018
+// Last Modified: Sat Mar 23 00:11:42 EDT 2019
 // Filename:      midi2exp/include/Expressionizer.h
 // Website:       https://github.com/pianoroll/midi2exp
 // Syntax:        C++11
@@ -46,7 +46,7 @@ class Expressionizer {
 		bool          applyTrackBarWidthCorrection (void);
 		void          updateMidiTimingInfo         (void);
 
-		void          setRollTempo	               (double value);
+		void          setRollTempo                 (double value);
 		void          setPunchDiameter             (double value);
 		void          setPunchExtensionFraction    (double value);
 		double        getPunchDiameter             (void);
@@ -54,68 +54,68 @@ class Expressionizer {
 		void          removeExpressionTracksOnWrite(void);
 		bool          setPianoTimbre               (void);
 
-		void    addSustainPedalling (smf::MidiFile& midifile, int sourcetrack);
-		void    addSoftPedalling    (smf::MidiFile& midifile, int sourcetrack);
+		void          addSustainPedalling          (int sourcetrack, int onkey, int offkey);
+		void          addSoftPedalling             (int sourcetrack, int onkey, int offkey);
+
+		void          setupRedWelte                (void);
 
 	protected:
-		void          calculateRedWelteExpression (std::string option);
-		void          applyExpression             (std::string option);
-		double        getPreviousNonzero          (std::vector<double>& myArray,
-		                                           int start_index);
+		bool          hasControllerInTrack         (int track, int controller);
+		void          calculateRedWelteExpression  (std::string option);
+		void          applyExpression              (std::string option);
+		double        getPreviousNonzero           (std::vector<double>& myArray, int start_index);
 	private:
 
-		double welte_p            = 38.0;
-		double welte_mf           = 60.0;
-		double welte_f            = 85.0;
-		double welte_loud         = 70.0;
-		double cresc_rate         = 1.0;
+		double welte_p        = 38.0;
+		double welte_mf       = 60.0;
+		double welte_f        = 85.0;
+		double welte_loud     = 70.0;
+		double cresc_rate     = 1.0;
 
-		double punch_width         = 21.5;  // diameter of the hole punches (in pixels/ticks)
-		double punch_fraction      = 0.25;  // extenion length of holes (0.25 = 25% longer)
+		double punch_width    = 21.5;  // diameter of the hole punches (in pixels/ticks)
+		double punch_fraction = 0.25;  // extenion length of holes (0.25 = 25% longer)
 
 		bool trackbar_correction_done = false;
 		bool delete_expresison_tracks = false;
 
 		// left_adjust: reduce loudness of bass register (for attack velocities)
-		int left_adjust           = -10;
+		int left_adjust       = -10;
 
-		double time_scale         = 1.0;
+		double time_scale     = 1.0;
 
 		// pan_bass: the MIDI pan controller value for bass register:
-		int    pan_bass           = 52;
+		int    pan_bass       = 52;
 
 		// pan_treble: the MIDI pan controller value for treble register:
-		int    pan_treble         = 76;
+		int    pan_treble     = 76;
 
-		int    TREBLE_EXPRESSION  = 4;
-		int    BASS_EXPRESSION    = 3;
+		// expression keys for Red Welte rolls (initialized in setupRedWelte()):
+		int    PedalOnKey;
+		int    PedalOffKey;
+		int    SoftOnKey;
+		int    SoftOffKey;
 
-		int    PedalOnKey         = 106;
-		int    PedalOffKey        = 107;
-		int    SoftOnKey          = 21;
-		int    SoftOffKey         = 20;     // for red rolls
-
-		bool   read_pedal         = true;
+		bool   read_pedal     = true;
 
 		// midi_data: store of the input/output MIDI data file:
 		smf::MidiFile midi_data;
 
 		// MIDI tracks for each component of the input MIDI data.
 		// The 0th track is for tempo meta messages (no notes):
-		int bass_track       = 1; // track index for bass register notes
-		int treble_track     = 2; // track index for treble register notes
-		int bass_exp_track   = 3; // track index for bass notes expression
-		int treble_exp_track = 4; // track index for treble notes expression
+		int bass_track        = 1; // track index for bass register notes
+		int treble_track      = 2; // track index for treble register notes
+		int bass_exp_track    = 3; // track index for bass notes expression
+		int treble_exp_track  = 4; // track index for treble notes expression
 
 		// MIDI channels for each component of the input MIDI data:
-		int bass_ch          = 1; // channel number of bass register notes
-		int treble_ch        = 2; // channel number of treble register notes
-		int bass_exp_ch      = 0; // channel number of bass notes expression
-		int treble_exp_ch    = 3; // channel number of treble notes expression
+		int bass_ch           = 1; // channel number of bass register notes
+		int treble_ch         = 2; // channel number of treble register notes
+		int bass_exp_ch       = 0; // channel number of bass notes expression
+		int treble_exp_ch     = 3; // channel number of treble notes expression
 
-		double slow_step     = -1000;
-  		double fastC_step    = -1000;
-  		double fastD_step    = -1000;
+		double slow_step      = -1000;
+  		double fastC_step     = -1000;
+  		double fastD_step     = -1000;
 
 		// exp_bass: the model expression at every millisecond for bass register.
 		std::vector<double> exp_bass;

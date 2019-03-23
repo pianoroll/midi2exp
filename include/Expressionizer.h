@@ -54,6 +54,11 @@ class Expressionizer {
 		void          removeExpressionTracksOnWrite(void);
 		bool          setPianoTimbre               (void);
 
+		void    addSustainPedalling (MidiFile& midifile, int sourcetrack,
+                             int targettrack);
+		void    addSoftPedalling    (MidiFile& midifile, int sourcetrack,
+                             int targettrack);
+
 	protected:
 		void          calculateRedWelteExpression (std::string option);
 		void          applyExpression             (std::string option);
@@ -83,6 +88,9 @@ class Expressionizer {
 
 		// pan_treble: the MIDI pan controller value for treble register:
 		int    pan_treble         = 76;
+
+		int    TREBLE_EXPRESSION  = 4;
+		int    BASS_EXPRESSION    = 3;
 
 		bool   read_pedal         = true;
 

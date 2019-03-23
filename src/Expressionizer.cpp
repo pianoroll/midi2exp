@@ -62,10 +62,79 @@ void Expressionizer::addExpression(void) {
 	applyExpression("left_hand");
 	applyExpression("right_hand");
 
-	// Adding Pedal
-	// if self.read_pedal is true:
-	// 		self.addPedal()
+	addSustainPedalling(midifile, TREBLE_EXPRESSION);
+	addSoftPedalling(midifile, BASS_EXPRESSION);
 }
+
+
+
+//////////////////////////////
+//
+// addSustainPedalling --
+//
+
+void addSustainPedalling(MidiFile& midifile, int sourcetrack) {
+	int count = midifile.getEventCount(sourcetrack);
+	MidiEvent me_bass;
+	MidiEvent me_treble;
+	me_bass.track = 1;
+	me_treble.track = 2;
+	for (int i=0; i<count; i++) {
+		if (!midifile[sourcetrack][i].isNoteOn()) {
+			continue;
+		}
+		int key = midifile[sourcetrack][i].getKeyNumber();
+		me_bass.tick = midifile[sourcetrack][i].tick;
+		me_treble.tick = midifile[sourcetrack][i].tick;
+		if (key == PedalOnKey) {
+			me_bass.makeController(1, 64, 127);
+			midifile.addEvent(me_bass);
+			me_treble.makeController(2, 64, 127);
+			midifile.addEvent(me_treble);
+		} else if (key == PedalOffKey) {
+			me_bass.makeController(1, 64, 0);
+			midifile.addEvent(me_bass);
+			me_treble.makeController(2, 64, 0);
+			midifile.addEvent(me_treble);
+		}
+	}
+	midifile.sortTracks();
+}
+
+
+
+//////////////////////////////
+//
+// addSoftPedalling --
+//
+
+void addSoftPedalling(MidiFile& midifile, int sourcetrack) {
+	int count = midifile.getEventCount(sourcetrack);
+	MidiEvent me_bass;
+	MidiEvent me_treble;
+	me_bass.track = 1;
+	me_treble.track = 2;
+	for (int i=0; i<count; i++) {
+		if (!midifile[sourcetrack][i].isNoteOn()) {
+			continue;
+		}
+		int key = midifile[sourcetrack][i].getKeyNumber();
+		me_bass.tick = midifile[sourcetrack][i].tick;
+		if (key == SoftOnKey) {
+			me_bass.makeController(1, 67, 127);
+			midifile.addEvent(me_bass);
+			me_treble.makeController(2, 67, 127);
+			midifile.addEvent(me_treble);
+		} else if (key == SoftOffKey) {
+			me_bass.makeController(1, 67, 0);
+			midifile.addEvent(me_bass);
+			me_treble.makeController(2, 67, 0);
+			midifile.addEvent(me_treble);
+		}
+	}
+	midifile.sortTracks();
+}
+
 
 
 //////////////////////////////
@@ -179,21 +248,6 @@ bool Expressionizer::writeMidiFile(std::string filename) {
 }
 
 
-
-/*
-	def writeOut(self):
-		// Timbre and output
-		outMidi = pretty_midi.PrettyMIDI()
-		leftHand = pretty_midi.Instrument(program=pretty_midi.instrument_name_to_program('Acoustic Grand Piano'))
-		rightHand = pretty_midi.Instrument(program=pretty_midi.instrument_name_to_program('Acoustic Grand Piano'))
-
-		outMidi.instruments.append(self.left)
-		outMidi.instruments.append(self.right)
-
-		// Write out the MIDI data
-		outMidi.write(self.out_path)
-		print 'write to : ', self.out_path
-*/
 
 
 /*  Probably already in input MIDI file:

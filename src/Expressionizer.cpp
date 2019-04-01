@@ -625,7 +625,7 @@ bool Expressionizer::applyTrackBarWidthCorrection(void) {
 		return false;
 	}
 
-	int correction = int(getPunchDiameter() * getPunchExtensionFraction() + 0.5);
+	int correction = int(getTrackerbarDiameter() * getPunchExtensionFraction() + 0.5);
 	for (int i=0; i<midi_data.getTrackCount(); i++) {
 		for (int j=0; j<midi_data[i].getEventCount(); j++) {
 			if (!midi_data[i][j].isNoteOff()) {
@@ -653,6 +653,15 @@ void Expressionizer::setPunchDiameter(double value) {
 }
 
 
+///////////////////////////////
+//
+// Expressionizer::setTrackerbarDiameter --
+//
+
+void Expressionizer::setTrackerbarDiameter(double value) {
+	tracker_width = value;
+}
+
 
 ///////////////////////////////
 //
@@ -670,6 +679,15 @@ void Expressionizer::setPunchExtensionFraction(double value) {
 //
 double Expressionizer::getPunchDiameter(void) {
 	return punch_width;
+}
+
+
+///////////////////////////////
+//
+// Expressionizer::getTrackerbarDiameter --
+//
+double Expressionizer::getTrackerbarDiameter(void) {
+	return tracker_width;
 }
 
 

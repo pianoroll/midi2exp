@@ -26,7 +26,8 @@ int main(int argc, char** argv) {
 	options.define("b|print-boolean-states=b", "print boolean states with expressions");
 	options.define("d|punch-diameter=d:21.5", "hole punch diameter in pixels at 300 dpi");
 	options.define("e|print-expression=b", "print expression time values");
-	options.define("f|punch-fraction=d:0.25", "fraction of hole diameter to extend notes by to emulate tracker bar width");
+	options.define("f|punch-fraction=d:0.75", "fraction of hole diameter to extend notes by to emulate tracker bar width");
+	options.define("k|trackerbar-diameter=d:16.7", "tracker bar height in pixels at 300 dpi");
 	options.define("r|remove-expression-tracks=b", "remove expression tracks");
 	options.define("t|tempo=d:100", "tempo adjustment for pianoroll file");
 	options.define("w|red-welte=b:", "set tempo for red welte rolls");
@@ -36,6 +37,7 @@ int main(int argc, char** argv) {
 	Expressionizer creator;
 
 	creator.setPunchDiameter(options.getDouble("punch-diameter"));
+	creator.setTrackerbarDiameter(options.getDouble("trackerbar-diameter"));
 	creator.setPunchExtensionFraction(options.getDouble("punch-fraction"));
 	if (options.getBoolean("remove-expression-tracks")) {
 		creator.removeExpressionTracksOnWrite();

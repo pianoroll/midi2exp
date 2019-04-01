@@ -48,8 +48,11 @@ class Expressionizer {
 
 		void          setRollTempo                 (double value);
 		void          setPunchDiameter             (double value);
+		void          setTrackerbarDiameter        (double value);
+
 		void          setPunchExtensionFraction    (double value);
 		double        getPunchDiameter             (void);
+		double		  getTrackerbarDiameter        (void);
 		double        getPunchExtensionFraction    (void);
 		void          removeExpressionTracksOnWrite(void);
 		bool          setPianoTimbre               (void);
@@ -74,6 +77,9 @@ class Expressionizer {
 
 		double punch_width    = 21.5;  // diameter of the hole punches (in pixels/ticks)
 		double punch_fraction = 0.25;  // extenion length of holes (0.25 = 25% longer)
+
+		double tracker_width = 1.413 * 300.25 / 25.4; // diameter of the punch hole (1.413mm * 300.25 pixels/inch / 25.44 mm/inch)
+		double tracker_fraction = 0.75;               // for hole extension, 75% of the tracker bar diameter
 
 		bool trackbar_correction_done = false;
 		bool delete_expresison_tracks = false;

@@ -124,8 +124,8 @@ void Expressionizer::addSustainPedalling(int sourcetrack, int onkey, int offkey)
 			midifile.addController(bass_track,   tick, bass_ch,   pedal_controller, 127);
 			midifile.addController(treble_track, tick, treble_ch, pedal_controller, 127);
 		} else if (key == offkey) {
-			midifile.addController(bass_track,   tick, bass_ch,   pedal_controller, 127);
-			midifile.addController(treble_track, tick, treble_ch, pedal_controller, 127);
+			midifile.addController(bass_track,   tick, bass_ch,   pedal_controller, 0);
+			midifile.addController(treble_track, tick, treble_ch, pedal_controller, 0);
 		}
 	}
 	midifile.sortTracks();

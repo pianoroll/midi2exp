@@ -69,9 +69,9 @@ class Expressionizer {
 		double        getPreviousNonzero           (std::vector<double>& myArray, int start_index);
 	private:
 
-		double welte_p        = 38.0;
+		double welte_p        = 38.0;  // 38.0
 		double welte_mf       = 60.0;
-		double welte_f        = 85.0;
+		double welte_f        = 85.0;  // 85.0
 		double welte_loud     = 70.0;
 		double cresc_rate     = 1.0;
 
@@ -135,9 +135,9 @@ class Expressionizer {
 		std::vector<double> isFastC_treble;
 		std::vector<double> isFastD_treble;
 
-  		// 2.0 is some regulation, modified from table 4.1 from Peter's thesis
-		double slow_decay_rate  = 2380.0;
-		double fastC_decay_rate = 700.0 * 2.0;
+  		// Regulation of crescendo and decrescendo rate
+		double slow_decay_rate  = 2380.0 * 4.0;
+		double fastC_decay_rate = 700.0 * 1.5;
 		double fastD_decay_rate = 150.0 * 2.2;
 };
 

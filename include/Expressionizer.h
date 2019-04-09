@@ -136,9 +136,12 @@ class Expressionizer {
 		std::vector<double> isFastD_treble;
 
   		// Regulation of crescendo and decrescendo rate
+		//double slow_decay_rate  = 2380.0 * 2.0;
+		//double fastC_decay_rate = 170.0;
+		//double fastD_decay_rate = 150.0 * 2.2;
 		double slow_decay_rate  = 2380.0 * 4.0;
-		double fastC_decay_rate = 700.0 * 1.5;
-		double fastD_decay_rate = 150.0 * 2.2;
+		double fastC_decay_rate = 700.0; //1050.0;
+		double fastD_decay_rate = 330;
 };
 
 

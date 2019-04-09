@@ -37,7 +37,7 @@ Expressionizer::Expressionizer(void) {
 //
 
 void Expressionizer::setupRedWelte(void) {
-	slow_step   =  cresc_rate * welte_mf            / slow_decay_rate;
+	slow_step   =  cresc_rate * welte_mf / slow_decay_rate;
 	fastC_step  =  cresc_rate * (welte_f - welte_p) / fastC_decay_rate;
 	fastD_step  = -cresc_rate * (welte_f - welte_p) / fastD_decay_rate;
 	// cerr << "CRESC_RATE " << cresc_rate << endl;

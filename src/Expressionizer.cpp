@@ -205,7 +205,8 @@ bool Expressionizer::hasControllerInTrack(int track, int controller) {
 //////////////////////////////
 //
 // Expressionizer::setRollTempo -- Set the tempo of the roll
-// input: tempo (98.4252 for red welte), (default 300 dpi, 6 as multiplier)
+// input: tempo  (slow: 67.25, regular: 104.331, fast: 143.373)
+// (old tempo: 98.4252 for red welte), (default 300 dpi, 6 as multiplier)
 //
 void Expressionizer::setRollTempo(double tempo) {
 	midi_data.setTPQ(int(tempo * 6 + 0.5));

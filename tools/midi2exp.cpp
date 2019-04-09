@@ -51,7 +51,7 @@ int main(int argc, char** argv) {
 		creator.readMidiFile(options.getArg(1));
 	}
 	if (options.getBoolean("red-welte")) {
-		creator.setRollTempo(98.4252);
+		creator.setRollTempo(104.331);    // old tempo: 98.4252
 	}
 	else if (options.getBoolean("tempo")) {
 		creator.setRollTempo(options.getDouble("tempo"));

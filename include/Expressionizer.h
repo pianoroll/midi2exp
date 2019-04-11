@@ -139,9 +139,14 @@ class Expressionizer {
 		//double slow_decay_rate  = 2380.0 * 2.0;
 		//double fastC_decay_rate = 170.0;
 		//double fastD_decay_rate = 150.0 * 2.2;
-		double slow_decay_rate  = 2380.0 * 4.0;
-		double fastC_decay_rate = 700.0; //1050.0;
-		double fastD_decay_rate = 330;
+		// experiment 0411
+		double slow_decay_rate  = 2370.0;
+		double fastC_decay_rate = 200; //1050.0;
+		double fastD_decay_rate = 300;
+		// before 0411
+		// double slow_decay_rate  = 2380.0 * 4.0;
+		// double fastC_decay_rate = 700.0; //1050.0;
+		// double fastD_decay_rate = 330;
 };
 
 

@@ -80,6 +80,7 @@ class MidiFile {
 		int              getTickState              (void) const;
 		bool             isDeltaTicks              (void) const;
 		bool             isAbsoluteTicks           (void) const;
+		int              getMaxTick                (void);
 
 		// join/split track functionality:
 		void             joinTracks                (void);

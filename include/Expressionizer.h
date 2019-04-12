@@ -27,7 +27,7 @@
 #include <string>
 #include <vector>
 
-#include "MidiFile.h"
+#include "MidiRoll.h"
 
 class Expressionizer {
 
@@ -64,7 +64,24 @@ class Expressionizer {
 
 		void          setupRedWelte                (void);
 
+		void          setWelteP                    (double value);
+		void          setWelteMF                   (double value);
+		void          setWelteF                    (double value);
+		void          setWelteLoud                 (double value);
+		void          setSlowDecayRate             (double value);
+		void          setFastCrescendo             (double value);
+		void          setFastDecrescendo           (double value);
+
+		double        getWelteP                    (void);
+		double        getWelteMF                   (void);
+		double        getWelteF                    (void);
+		double        getWelteLoud                 (void);
+		double        getSlowDecayRate             (void);
+		double        getFastCrescendo             (void);
+		double        getFastDecrescendo           (void);
+
 	protected:
+		void          addMetadata                  (void);
 		bool          hasControllerInTrack         (int track, int controller);
 		void          calculateRedWelteExpression  (std::string option);
 		void          applyExpression              (std::string option);
@@ -78,7 +95,7 @@ class Expressionizer {
 		double cresc_rate     = 1.0;
 
 		double punch_width    = 21.5;  // diameter of the hole punches (in pixels/ticks)
-		double punch_fraction = 0.25;  // extenion length of holes (0.25 = 25% longer)
+		double punch_fraction = 0.75;  // extention length of holes (0.75 = 75% longer)
 
 		double tracker_width = 1.413 * 300.25 / 25.4; // diameter of the punch hole (1.413mm * 300.25 pixels/inch / 25.44 mm/inch)
 		double tracker_fraction = 0.75;               // for hole extension, 75% of the tracker bar diameter
@@ -106,7 +123,7 @@ class Expressionizer {
 		bool   read_pedal     = true;
 
 		// midi_data: store of the input/output MIDI data file:
-		smf::MidiFile midi_data;
+		smf::MidiRoll midi_data;
 
 		// MIDI tracks for each component of the input MIDI data.
 		// The 0th track is for tempo meta messages (no notes):

@@ -14,9 +14,11 @@
 #include "Expressionizer.h"
 
 #include <algorithm>
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <sstream>
 #include <string>
+#include <ctime>
 
 using namespace std;
 using namespace smf;
@@ -98,7 +100,7 @@ void Expressionizer::addExpression(void) {
 //
 
 void Expressionizer::addSustainPedalling(int sourcetrack, int onkey, int offkey) {
-	MidiFile& midifile = midi_data;
+	MidiRoll& midifile = midi_data;
 	const int pedal_controller = 64;  // sustain pedal
 
 	bool hascontroller = hasControllerInTrack(bass_track, pedal_controller);
@@ -144,7 +146,7 @@ void Expressionizer::addSustainPedalling(int sourcetrack, int onkey, int offkey)
 //
 
 void Expressionizer::addSoftPedalling(int sourcetrack, int onkey, int offkey) {
-	MidiFile& midifile = midi_data;
+	MidiRoll& midifile = midi_data;
 	const int pedal_controller = 67;  // soft pedal
 
 	bool hascontroller = hasControllerInTrack(bass_track, pedal_controller);
@@ -317,8 +319,75 @@ bool Expressionizer::writeMidiFile(std::string filename) {
 		midi_data.deleteTrack(3);
 	}
 
+	addMetadata();
+
 	return midi_data.write(filename);
 }
+
+
+//////////////////////////////
+//
+// Expressionizer::addMetadata --
+//
+
+void Expressionizer::addMetadata(void) {
+	midi_data.setMetadata("EXP_SOFTWARE", "\t\thttps://github.com/pianoroll/midi2exp");
+
+	stringstream ss;
+	ss << "@EXP_SOFTWARE_DATE:\t" << __DATE__ << " " << __TIME__   << "";
+	string sss = ss.str();
+	sss = ss.str();
+	sss.erase(remove(sss.begin(), sss.end(), '\n'), sss.end());
+	midi_data.addText(0, 0, sss);
+
+	ss.str("");
+	std::chrono::system_clock::time_point nowtime = std::chrono::system_clock::now();
+	std::time_t current_time = std::chrono::system_clock::to_time_t(nowtime);
+	ss << "@EXP_DATE:\t\t"     << std::ctime(&current_time);
+	sss = ss.str();
+	sss.erase(remove(sss.begin(), sss.end(), '\n'), sss.end());
+	midi_data.addText(0, 0, sss);
+
+	if (trackbar_correction_done) {
+		int correction = int(getTrackerbarDiameter() * getPunchExtensionFraction() + 0.5);
+		string value = "\t" + to_string(correction) + "px";
+		midi_data.setMetadata("TRACKER_EXTENSION", value);
+	} else {
+		midi_data.setMetadata("TRACKER_EXTENSION", "\t0px");
+	}
+
+	ss.str("");
+	ss << "\t\t" << getWelteP();
+	midi_data.setMetadata("EXP_WELTE_P", ss.str());
+
+	ss.str("");
+	ss << "\t\t" << getWelteMF();
+	midi_data.setMetadata("EXP_WELTE_MF", ss.str());
+
+	ss.str("");
+	ss << "\t\t" << getWelteF();
+	midi_data.setMetadata("EXP_WELTE_F", ss.str());
+
+	ss.str("");
+	ss << "\t" << getWelteLoud();
+	midi_data.setMetadata("EXP_WELTE_LOUD", ss.str());
+
+	ss.str("");
+	ss << "\t" << getSlowDecayRate() << " ms (time from welte_p to _welte_mf)";
+	midi_data.setMetadata("EXP_WELTE_SLOW_DECAY", ss.str());
+
+	ss.str("");
+	ss << "\t" << getFastCrescendo() << " ms (time from welte_p to _welte_mf)";
+	midi_data.setMetadata("EXP_WELTE_FAST_CRES", ss.str());
+
+	ss.str("");
+	ss << "\t" << getFastDecrescendo() << " ms (time from welte_p to _welte_f)";
+	midi_data.setMetadata("EXP_WELTE_FAST_DECRS", ss.str());
+
+	midi_data.setMetadata("MIDIFILE_TYPE", "\texp");
+
+}
+
 
 
 
@@ -797,5 +866,92 @@ bool Expressionizer::setPianoTimbre(void) {
 	return true;
 }
 
+
+
+///////////////////////////////
+//
+// Expressionizer::setWelteP -- Set the dynamic range for Welte (for p dynamic)
+//
+
+void Expressionizer::setWelteP(double value) {
+	welte_p = value;
+}
+
+
+
+///////////////////////////////
+//
+// Expressionizer::setWelteMF -- Set the dynamic range for Welte (for mf dynamic)
+//
+
+void Expressionizer::setWelteMF(double value) {
+	welte_mf = value;
+
+}
+
+
+
+///////////////////////////////
+//
+// Expressionizer::setWelteF -- Set the dynamic range for Welte (for f dynamic)
+//
+
+void Expressionizer::setWelteF(double value) {
+	welte_f = value;
+}
+
+
+
+///////////////////////////////
+//
+// Expressionizer::setWelteLoud -- Set the dynamic range for Welte
+//
+
+void Expressionizer::setWelteLoud(double value) {
+	welte_loud = value;
+}
+
+
+
+///////////////////////////////
+//
+// Expressionizer::setSlowDecayRate -- Set expresion information for red Welte rolls.
+//
+
+void Expressionizer::setSlowDecayRate(double value) { 
+	slow_step = value;
+
+}
+
+
+
+///////////////////////////////
+//
+// Expressionizer::setFastCrescendo -- Set expresion information for red Welte rolls.he dynamic range for Welte
+//
+
+void Expressionizer::setFastCrescendo(double value) { 
+	fastC_step = value;
+}
+
+
+
+///////////////////////////////
+//
+// Expressionizer::setFastDecrescendo -- Set expresion information for red Welte rolls.the dynamic range for Welte
+//
+void Expressionizer::setFastDecrescendo(double value) {
+	fastD_step = value;
+}
+
+
+
+double Expressionizer::getWelteP(void)          { return welte_p;    }
+double Expressionizer::getWelteMF(void)         { return welte_mf;   }
+double Expressionizer::getWelteF(void)          { return welte_f;    }
+double Expressionizer::getWelteLoud(void)       { return welte_loud; }
+double Expressionizer::getSlowDecayRate(void)   { return slow_decay_rate;  }
+double Expressionizer::getFastCrescendo(void)   { return fastC_decay_rate; }
+double Expressionizer::getFastDecrescendo(void) { return fastD_decay_rate; }
 
 

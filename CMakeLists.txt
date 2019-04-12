@@ -51,6 +51,7 @@ set(SRCS
     src/midifile/MidiFile.cpp
     src/midifile/MidiMessage.cpp
     src/Expressionizer.cpp
+    src/MidiRoll.cpp
 )
 
 set(HDRS
@@ -61,6 +62,7 @@ set(HDRS
     include/midifile/MidiMessage.h
     include/midifile/Options.h
     include/Expressionizer.h
+    include/MidiRoll.h
 )
 
 

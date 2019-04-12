@@ -144,9 +144,10 @@ class Expressionizer {
 		//double fastC_decay_rate = 170.0;
 		//double fastD_decay_rate = 150.0 * 2.2;
 		// experiment 0411
+		// v1:
 		double slow_decay_rate  = 2370;
-		double fastC_decay_rate = 200; //1050.0;
-		double fastD_decay_rate = 300;
+		double fastC_decay_rate = 180; // test roll shows around 170ms-200ms from min to MF hook
+		double fastD_decay_rate = 170; // test roll shows 166ms -- 300ms at max 400ms fast decrescendo can bring Max down to Min
 		// before 0411
 		// double slow_decay_rate  = 2380.0 * 4.0;
 		// double fastC_decay_rate = 700.0; //1050.0;

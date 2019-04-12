@@ -44,7 +44,7 @@ void Expressionizer::setupRedWelte(void) {
 	// fastD_step  = -cresc_rate * (welte_f - welte_p) / fastD_decay_rate;
 	slow_step   =  cresc_rate * (welte_mf - welte_p) / slow_decay_rate;
 	fastC_step  =  cresc_rate * (welte_mf - welte_p) / fastC_decay_rate;
-	fastD_step  = -cresc_rate * (welte_mf - welte_p) / fastD_decay_rate;
+	fastD_step  = -cresc_rate * (welte_f - welte_p)  / fastD_decay_rate;
 	// cerr << "CRESC_RATE " << cresc_rate << endl;
 	// cerr << "SLOW STEP " << slow_step << endl;
 	// cerr << "FASTC STEP " << fastC_step << endl;
@@ -571,9 +571,9 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 		if (isMF->at(i) == true) {
 			if ((expression_list->at(i-1) > welte_mf) && (amount > 0)) {
 				// do nothing
-			} else if ((expression_list->at(i-1) > welte_mf) && (amount < 0)) {
+			} else if ((expression_list->at(i-1) >= welte_mf) && (amount < 0)) {
 				expression_list->at(i) = std::max(welte_mf, expression_list->at(i));
-			} else if ((expression_list->at(i-1) <= welte_mf) && (amount < 0)) {
+			} else if ((expression_list->at(i-1) < welte_mf) && (amount < 0)) {
 				// do nothing
 			} else if ((expression_list->at(i-1) <= welte_mf) && (amount > 0)) {
 				expression_list->at(i) = std::min(welte_mf, expression_list->at(i));
@@ -606,7 +606,7 @@ void Expressionizer::printVelocity() {
 	ofstream outFile3("mf-bass.txt");
 	for (const auto &e3 : isMF_bass) outFile3 << e3 << "\n";
 	ofstream outFile4("mf-treble.txt");
-	for (const auto &e4 : isMF_treble) outFile3 << e4 << "\n";
+	for (const auto &e4 : isMF_treble) outFile4 << e4 << "\n";
 }
 
 //////////////////////////////

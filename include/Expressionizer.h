@@ -39,6 +39,8 @@ class Expressionizer {
 		bool          writeMidiFile                (std::string filename);
 
 		std::ostream& printExpression              (std::ostream& out, bool extended = false);
+		void 		  printVelocity();
+
 
 		void          addExpression                (void);
 		void          setPan                       (void);
@@ -125,12 +127,14 @@ class Expressionizer {
 
 		// exp_bass: the model expression at every millisecond for bass register.
 		std::vector<double> exp_bass;
+		std::vector<double> isMF_bass;
 		std::vector<double> isSlowC_bass;
 		std::vector<double> isFastC_bass;
 		std::vector<double> isFastD_bass;
 
 		// exp_treble: model expression at every millisecond for treble register.
 		std::vector<double> exp_treble;
+		std::vector<double> isMF_treble;
 		std::vector<double> isSlowC_treble;
 		std::vector<double> isFastC_treble;
 		std::vector<double> isFastD_treble;
@@ -140,7 +144,7 @@ class Expressionizer {
 		//double fastC_decay_rate = 170.0;
 		//double fastD_decay_rate = 150.0 * 2.2;
 		// experiment 0411
-		double slow_decay_rate  = 2370.0;
+		double slow_decay_rate  = 2370;
 		double fastC_decay_rate = 200; //1050.0;
 		double fastD_decay_rate = 300;
 		// before 0411

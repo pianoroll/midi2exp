@@ -15,6 +15,8 @@
 
 #include <algorithm>
 #include <iostream>
+#include <fstream>
+#include <string>
 
 using namespace std;
 using namespace smf;
@@ -432,6 +434,7 @@ double Expressionizer::getPreviousNonzero(vector<double>& myArray,
 void Expressionizer::calculateRedWelteExpression(std::string option) {
 	int track_index;
 	vector<double>* expression_list;
+	vector<double>* isMF;
 	vector<double>* isSlowC;
 	vector<double>* isFastC;
 	vector<double>* isFastD;
@@ -440,12 +443,14 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 	if (option == "left_hand") {
 		track_index = bass_exp_track;
 		expression_list = &exp_bass;
+		isMF = &isMF_bass;
 		isSlowC = &isSlowC_bass;
 		isFastC = &isFastC_bass;
 		isFastD = &isFastD_bass;
 	} else {
 		track_index = treble_exp_track;
 		expression_list = &exp_treble;
+		isMF = &isMF_treble;
 		isSlowC = &isSlowC_treble;
 		isFastC = &isFastC_treble;
 		isFastD = &isFastD_treble;
@@ -464,11 +469,13 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 	// set all of the times to piano by default:
 	std::fill(expression_list->begin(), expression_list->end(), welte_p);
 
-	vector<bool> isMF(exp_length, false);    // setting up the upper/lower bound
+	// vector<bool> isMF(exp_length, false);    // setting up the upper/lower bound
 
+	isMF->resize(exp_length);
 	isSlowC->resize(exp_length);
 	isFastC->resize(exp_length);
 	isFastD->resize(exp_length);
+	std::fill(isMF->begin(), isMF->end(), false);        // is MF hook on?
 	std::fill(isSlowC->begin(), isSlowC->end(), false);  // is slow crescendo on?
 	std::fill(isFastC->begin(), isFastC->end(), false);  // is fast crescendo on?
 	std::fill(isFastD->begin(), isFastD->end(), false);  // is fast decrescendo on?
@@ -497,7 +504,8 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 			if (valve_mf_on) {
 				for (int j=valve_mf_starttime; j<st; j++) {
 					// record MF Valve information for previous
-					isMF[j] = true;
+					isMF->at(j) = true;
+					//cout << "MF is on" << '\t' << j << endl;
 				}
 			}
 			valve_mf_on = false;
@@ -560,14 +568,14 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 		double newV = expression_list->at(i-1) + amount;
 		expression_list->at(i) = newV;
 
-		if (isMF[i]) {
+		if (isMF->at(i) == true) {
 			if ((expression_list->at(i) > welte_mf) && (amount > 0)) {
 				// do nothing
 			} else if ((expression_list->at(i) > welte_mf) && (amount < 0)) {
 				expression_list->at(i) = std::max(welte_mf, expression_list->at(i));
-			} else if ((expression_list->at(i) < welte_mf) && (amount < 0)) {
+			} else if ((expression_list->at(i) <= welte_mf) && (amount < 0)) {
 				// do nothing
-			} else if ((expression_list->at(i) < welte_mf) && (amount > 0)) {
+			} else if ((expression_list->at(i) <= welte_mf) && (amount > 0)) {
 				expression_list->at(i) = std::min(welte_mf, expression_list->at(i));
 			}
 		} else {
@@ -586,6 +594,20 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 }
 
 
+//////////////////////////////
+//
+// Expressionizer::printVelocity --
+//
+void Expressionizer::printVelocity() {
+	ofstream outFile("vel-bass.txt");
+	for (const auto &e : exp_bass) outFile << e << "\n";
+	ofstream outFile2("vel-treble.txt");
+	for (const auto &e2 : exp_treble) outFile2 << e2 << "\n";
+	ofstream outFile3("mf-bass.txt");
+	for (const auto &e3 : isMF_bass) outFile3 << e3 << "\n";
+	ofstream outFile4("mf-treble.txt");
+	for (const auto &e4 : isMF_treble) outFile3 << e4 << "\n";
+}
 
 //////////////////////////////
 //

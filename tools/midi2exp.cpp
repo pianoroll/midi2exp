@@ -67,7 +67,7 @@ int main(int argc, char** argv) {
 	creator.addExpression();
 	creator.setPianoTimbre();
 	creator.writeMidiFile(options.getArg(2));
-	creator.printVelocity();   // for debug
+	//creator.printVelocity();   // for debug
 
 	if (options.getBoolean("print-expression")) {
 		creator.printExpression(cout, options.getBoolean("display-extended-expression-info"));

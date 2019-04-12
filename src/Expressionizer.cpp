@@ -531,8 +531,6 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 	// length of the MIDI file in milliseconds (plus an extra millisecond
 	// to avoid problems):
 	int exp_length = midi_data.getFileDurationInSeconds() * 1000 + 1;
-
-
 	expression_list->resize(exp_length);
 
 	// set all of the times to piano by default:
@@ -567,6 +565,7 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 		int exp_no = me->getKeyNumber();  // expression number
 		int st = int(me->seconds * 1000.0 + 0.5);  // start time in milliseconds
 		int et = int((me->seconds + me->getDurationInSeconds()) * 1000.0 + 0.5);
+
 
 		if ((exp_no == 14) || (exp_no == 113)) {
 			// MF off
@@ -614,9 +613,7 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 		}
 	}
 
-
 	// TODO: deal with the last case (if crescendo OFF is missing)
-
 
 	// Second pass, update the current velocity according to the previous one
 
@@ -677,6 +674,8 @@ void Expressionizer::printVelocity() {
 	ofstream outFile4("mf-treble.txt");
 	for (const auto &e4 : isMF_treble) outFile4 << e4 << "\n";
 }
+
+
 
 //////////////////////////////
 //

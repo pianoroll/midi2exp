@@ -373,15 +373,15 @@ void Expressionizer::addMetadata(void) {
 	midi_data.setMetadata("EXP_WELTE_LOUD", ss.str());
 
 	ss.str("");
-	ss << "\t" << getSlowDecayRate() << " ms (time from welte_p to _welte_mf)";
+	ss << "\t" << getSlowDecayRate() << " ms (time from welte_p to welte_mf)";
 	midi_data.setMetadata("EXP_WELTE_SLOW_DECAY", ss.str());
 
 	ss.str("");
-	ss << "\t" << getFastCrescendo() << " ms (time from welte_p to _welte_mf)";
+	ss << "\t" << getFastCrescendo() << " ms (time from welte_p to welte_mf)";
 	midi_data.setMetadata("EXP_WELTE_FAST_CRES", ss.str());
 
 	ss.str("");
-	ss << "\t" << getFastDecrescendo() << " ms (time from welte_p to _welte_f)";
+	ss << "\t" << getFastDecrescendo() << " ms (time from welte_p to welte_f)";
 	midi_data.setMetadata("EXP_WELTE_FAST_DECRS", ss.str());
 
 	midi_data.setMetadata("MIDIFILE_TYPE", "\texp");

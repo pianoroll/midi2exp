@@ -569,13 +569,13 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 		expression_list->at(i) = newV;
 
 		if (isMF->at(i) == true) {
-			if ((expression_list->at(i) > welte_mf) && (amount > 0)) {
+			if ((expression_list->at(i-1) > welte_mf) && (amount > 0)) {
 				// do nothing
-			} else if ((expression_list->at(i) > welte_mf) && (amount < 0)) {
+			} else if ((expression_list->at(i-1) > welte_mf) && (amount < 0)) {
 				expression_list->at(i) = std::max(welte_mf, expression_list->at(i));
-			} else if ((expression_list->at(i) <= welte_mf) && (amount < 0)) {
+			} else if ((expression_list->at(i-1) <= welte_mf) && (amount < 0)) {
 				// do nothing
-			} else if ((expression_list->at(i) <= welte_mf) && (amount > 0)) {
+			} else if ((expression_list->at(i-1) <= welte_mf) && (amount > 0)) {
 				expression_list->at(i) = std::min(welte_mf, expression_list->at(i));
 			}
 		} else {

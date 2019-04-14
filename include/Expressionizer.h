@@ -79,6 +79,8 @@ class Expressionizer {
 		double        getSlowDecayRate             (void);
 		double        getFastCrescendo             (void);
 		double        getFastDecrescendo           (void);
+		double        getLeftRightDiff             (void);
+
 
 	protected:
 		void          addMetadata                  (void);
@@ -104,7 +106,7 @@ class Expressionizer {
 		bool delete_expresison_tracks = false;
 
 		// left_adjust: reduce loudness of bass register (for attack velocities)
-		int left_adjust       = -10;
+		int left_adjust       = -5;
 
 		double time_scale     = 1.0;
 
@@ -162,7 +164,7 @@ class Expressionizer {
 		//double fastD_decay_rate = 150.0 * 2.2;
 		// experiment 0411
 		// v1:
-		double slow_decay_rate  = 2370;
+		double slow_decay_rate  = 2380;  //2380
 		double fastC_decay_rate = 180; // test roll shows around 170ms-200ms from min to MF hook
 		double fastD_decay_rate = 170; // test roll shows 166ms -- 300ms at max 400ms fast decrescendo can bring Max down to Min
 		// before 0411

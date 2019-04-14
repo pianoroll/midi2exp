@@ -33,9 +33,9 @@ int main(int argc, char** argv) {
 	options.define("x|display-extended-expression-info=b", "display booleans needed to create expression");
 	options.define("w|red-welte=b:", "set tempo for red welte rolls");
 
-	options.define("sd|slow-decay-rate=d:2370", "Slow decay rate (Red Welte)");
-	options.define("fc|fast-crescendo=d:180", "Fast crescendo (Red Welte)");
-	options.define("fd|fast-decrescendo=d:170", "Fast descrescendo (Red Welte)");
+	options.define("sd|slow-decay-rate=d:2380", "Slow decay rate (Red Welte)");
+	options.define("fc|fast-crescendo=d:300", "Fast crescendo (Red Welte)");    //180
+	options.define("fd|fast-decrescendo=d:300", "Fast descrescendo (Red Welte)"); //17
 	options.define("wp|welte-piano=d:38.0", "(Red Welte)");
 	options.define("wmf|welte-mezzo-forte=d:60.0", "(Red Welte)");
 	options.define("wf|welte-forte=d:85.0", "(Red Welte)");
@@ -85,7 +85,7 @@ int main(int argc, char** argv) {
 	if (options.getBoolean("fast-crescendo")) {
 		creator.setFastCrescendo(options.getDouble("fast-crescendo"));
 	}
-	if (options.getBoolean("welte-loud")) {
+	if (options.getBoolean("fast-decrescendo")) {
 		creator.setFastDecrescendo(options.getDouble("fast-decrescendo"));
 	}
 

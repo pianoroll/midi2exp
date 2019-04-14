@@ -373,6 +373,10 @@ void Expressionizer::addMetadata(void) {
 	midi_data.setMetadata("EXP_WELTE_LOUD", ss.str());
 
 	ss.str("");
+	ss << "\t" << getLeftRightDiff();
+	midi_data.setMetadata("LEFT_HAND_ADJUST", ss.str());
+
+	ss.str("");
 	ss << "\t" << getSlowDecayRate() << " ms (time from welte_p to welte_mf)";
 	midi_data.setMetadata("EXP_WELTE_SLOW_DECAY", ss.str());
 
@@ -952,5 +956,4 @@ double Expressionizer::getWelteLoud(void)       { return welte_loud; }
 double Expressionizer::getSlowDecayRate(void)   { return slow_decay_rate;  }
 double Expressionizer::getFastCrescendo(void)   { return fastC_decay_rate; }
 double Expressionizer::getFastDecrescendo(void) { return fastD_decay_rate; }
-
-
+double Expressionizer::getLeftRightDiff(void)   { return left_adjust; }

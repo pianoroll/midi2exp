@@ -44,9 +44,9 @@ void Expressionizer::setupRedWelte(void) {
 	// slow_step   =  cresc_rate * welte_mf / slow_decay_rate;
 	// fastC_step  =  cresc_rate * (welte_f - welte_p) / fastC_decay_rate;
 	// fastD_step  = -cresc_rate * (welte_f - welte_p) / fastD_decay_rate;
-	slow_step   =  cresc_rate * (welte_mf - welte_p) / slow_decay_rate;
-	fastC_step  =  cresc_rate * (welte_mf - welte_p) / fastC_decay_rate;
-	fastD_step  = -cresc_rate * (welte_f - welte_p)  / fastD_decay_rate;
+	slow_step   =   (welte_mf - welte_p) / slow_decay_rate;
+	fastC_step  =   (welte_mf - welte_p) / fastC_decay_rate;
+	fastD_step  = - (welte_f - welte_p)  / fastD_decay_rate;
 	// cerr << "CRESC_RATE " << cresc_rate << endl;
 	// cerr << "SLOW STEP " << slow_step << endl;
 	// cerr << "FASTC STEP " << fastC_step << endl;
@@ -570,7 +570,8 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 		int st = int(me->seconds * 1000.0 + 0.5);  // start time in milliseconds
 		int et = int((me->seconds + me->getDurationInSeconds()) * 1000.0 + 0.5);
 
-
+		printf("i: %d\t", i);
+		printf("exp_no: %d\n", exp_no);
 		if ((exp_no == 14) || (exp_no == 113)) {
 			// MF off
 			if (valve_mf_on) {
@@ -587,25 +588,31 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 			if (!valve_mf_on) {    // if previous has an on, ignore
 				valve_mf_on = true;
 				valve_mf_starttime = st;
+				printf("detect MF on, recording valve_mf_starttime = %d\n", valve_mf_starttime);
 			}
-
-		} else if ((exp_no == 16) || (exp_no == 111)) {
+		}
+		// detect slow crescendo on, update starttime
+		  else if ((exp_no == 17) || (exp_no == 110)) { // Crescendo on (slow)
+			if (!valve_slowc_on) { // if previous has an on, ignore
+				valve_slowc_on = true;
+				valve_slowc_starttime = st;
+				printf("detect slowC on, recording valve_slowc_starttime = %d\n", valve_slowc_starttime);
+			}
+		}
+		// detect slow decrescendo off, update isSlowC
+		  else if ((exp_no == 16) || (exp_no == 111)) {
 			if (valve_slowc_on) {
 				for (int j=valve_slowc_starttime; j<st; j++) {
 					// record Cresc Valve information for previous
 					isSlowC->at(j) = true;
 				}
+				printf("update isSlowC from %d\t", valve_slowc_starttime);
+				printf("to %d\n", st-1);
 			}
 			valve_slowc_on = false;
-
-		} else if ((exp_no == 17) || (exp_no == 110)) { // Crescendo on (slow)
-			if (!valve_slowc_on) { // if previous has an on, ignore
-				valve_slowc_on = true;
-				valve_slowc_starttime = st;
-			}
-
+		}
 		// Fast Crescendo/Decrescendo is a direct operation (length of perforation matters)
-		} else if ((exp_no == 18) || (exp_no == 109)) { // Forzando off -- Fast Decrescendo
+		  else if ((exp_no == 18) || (exp_no == 109)) { // Forzando off -- Fast Decrescendo
 				for (int j=st; j<et; j++) {
 					isFastD->at(j) = true;
 				}
@@ -622,7 +629,19 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 	// Second pass, update the current velocity according to the previous one
 
 	double amount = 0.0;
+	double eps = 0.0001;
+	//bool lowerMF = false; // If it's an MF to prevent it from traveling further
+	printf("min: %f\t", welte_p);
+	printf("max: %f\t", welte_f);
+	printf("mf: %f\t", welte_mf);
+	printf("slow_cresc_rate: %f\t", slow_decay_rate);
+	printf("fast crescendo rate: %f\t", fastC_decay_rate);
+	printf("fast-decrescendo: %f\n", fastD_decay_rate);
 
+	printf("calculation: %f\n", (welte_mf - welte_p) / slow_decay_rate);
+	printf("slowstep: %f\t", slow_step);
+	printf("fastCstep: %f\t", fastC_step);
+	printf("fastDstep: %f\n", fastD_step);
 	for (int i=1; i<exp_length; i++) {
 		if ((isSlowC->at(i) == false) && (isFastC->at(i) == false) && (isFastD->at(i) == false)) {
 			amount = -slow_step; // slow decrescendo is always on
@@ -634,32 +653,61 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 		} else {
 			amount = isSlowC->at(i) * slow_step + isFastC->at(i) * fastC_step + isFastD->at(i) * fastD_step;
 		}
+		printf("i: %d\t", i);
+		printf("amount: %f\t", amount);
+		printf("isSlowC: %f\t", isSlowC->at(i));
+		printf("isFastC: %f\t", isFastC->at(i));
+		printf("isFastD: %f\t", isFastD->at(i));
+		//cout << isSlowC->at(i) << isSlowD->at(i) << isFastD->at(i) << endl;
+		//cout << ("isSlowC: " + std::to_string(isSlowC) + '\t' + "isFastC: " + std::to_string(isFastC) + '\t' + "isFastD: " + std::to_string(isFastD))  << endl;
 
 		double newV = expression_list->at(i-1) + amount;
+		//cout << ("newV: " + std::to_string(newV)) << endl;
+		printf("newV: %f\t", newV);
 		expression_list->at(i) = newV;
 
 		if (isMF->at(i) == true) {
-			if ((expression_list->at(i-1) > welte_mf) && (amount > 0)) {
-				// do nothing
-			} else if ((expression_list->at(i-1) >= welte_mf) && (amount < 0)) {
-				expression_list->at(i) = std::max(welte_mf, expression_list->at(i));
-			} else if ((expression_list->at(i-1) < welte_mf) && (amount < 0)) {
-				// do nothing
-			} else if ((expression_list->at(i-1) <= welte_mf) && (amount > 0)) {
-				expression_list->at(i) = std::min(welte_mf, expression_list->at(i));
+			if (expression_list->at(i-1) > welte_mf){
+				if (amount < 0) {
+					expression_list->at(i) = std::max(welte_mf + eps, expression_list->at(i));
+				}
+				//cout << "taking max" << endl;
+				else{
+					expression_list->at(i) = std::min(welte_f, expression_list->at(i));
+				}
 			}
+			else if (expression_list->at(i-1) < welte_mf){
+				if (amount > 0){
+					expression_list->at(i) = std::min(welte_mf - eps, expression_list->at(i));
+				}
+				else{
+					expression_list->at(i) = std::max(welte_p, expression_list->at(i));
+				}
+				//cout << " taking min " << endl;
+			}
+			else{
+				//cout << "equals 60 here" << endl;
+			}
+			// if ((expression_list->at(i-1) > welte_mf) && (amount > 0)) {
+			// 	// do nothing
+			// } else if ((expression_list->at(i-1) >= welte_mf) && (amount < 0)) {
+			// 	expression_list->at(i) = std::max(welte_mf, expression_list->at(i));
+			// } else if ((expression_list->at(i-1) < welte_mf) && (amount < 0)) {
+			// 	// do nothing
+			// } else if ((expression_list->at(i-1) <= welte_mf) && (amount > 0)) {
+			// 	expression_list->at(i) = std::min(welte_mf, expression_list->at(i));
+			// }
 		} else {
-			// new: adding loud
 			// slow crescendo will only reach welte_loud
-			if (isSlowC->at(i) && (isFastC->at(i) == false)) {
-				expression_list->at(i) = min(expression_list->at(i), welte_loud);
+			if (isSlowC->at(i) && (isFastC->at(i) == false) && expression_list->at(i-1) < welte_loud) {
+				expression_list->at(i) = min(expression_list->at(i), welte_loud - eps);
 			}
 		}
-
+		// regulating max and min
 		expression_list->at(i) = max(welte_p, expression_list->at(i));
-
-		// regulating max
 		expression_list->at(i) = min(welte_f, expression_list->at(i));
+		//cout << ("newV after process: " + std::to_string(expression_list->at(i))) << endl;
+		printf("newV after process: %f\n", expression_list->at(i));
 	}
 }
 
@@ -921,9 +969,9 @@ void Expressionizer::setWelteLoud(double value) {
 // Expressionizer::setSlowDecayRate -- Set expresion information for red Welte rolls.
 //
 
-void Expressionizer::setSlowDecayRate(double value) { 
-	slow_step = value;
-
+void Expressionizer::setSlowDecayRate(double value) {
+	//slow_step = value;
+	slow_decay_rate = value;
 }
 
 
@@ -933,8 +981,9 @@ void Expressionizer::setSlowDecayRate(double value) {
 // Expressionizer::setFastCrescendo -- Set expresion information for red Welte rolls.he dynamic range for Welte
 //
 
-void Expressionizer::setFastCrescendo(double value) { 
-	fastC_step = value;
+void Expressionizer::setFastCrescendo(double value) {
+	//fastC_step = value;
+	fastC_decay_rate = value;
 }
 
 
@@ -944,7 +993,8 @@ void Expressionizer::setFastCrescendo(double value) {
 // Expressionizer::setFastDecrescendo -- Set expresion information for red Welte rolls.the dynamic range for Welte
 //
 void Expressionizer::setFastDecrescendo(double value) {
-	fastD_step = value;
+	//fastD_step = value;
+	fastD_decay_rate = value;
 }
 
 

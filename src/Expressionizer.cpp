@@ -509,6 +509,7 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 	vector<double>* expression_list;
 	vector<double>* isMF;
 	vector<double>* isSlowC;
+	vector<double>* isSlowD;
 	vector<double>* isFastC;
 	vector<double>* isFastD;
 
@@ -518,6 +519,7 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 		expression_list = &exp_bass;
 		isMF = &isMF_bass;
 		isSlowC = &isSlowC_bass;
+		isSlowD = &isSlowD_bass;
 		isFastC = &isFastC_bass;
 		isFastD = &isFastD_bass;
 	} else {
@@ -525,6 +527,7 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 		expression_list = &exp_treble;
 		isMF = &isMF_treble;
 		isSlowC = &isSlowC_treble;
+		isSlowD = &isSlowD_treble;
 		isFastC = &isFastC_treble;
 		isFastD = &isFastD_treble;
 	}
@@ -544,10 +547,12 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 
 	isMF->resize(exp_length);
 	isSlowC->resize(exp_length);
+	isSlowD->resize(exp_length);
 	isFastC->resize(exp_length);
 	isFastD->resize(exp_length);
 	std::fill(isMF->begin(), isMF->end(), false);        // is MF hook on?
 	std::fill(isSlowC->begin(), isSlowC->end(), false);  // is slow crescendo on?
+	std::fill(isSlowD->begin(), isSlowC->end(), true);  // is slow crescendo on?
 	std::fill(isFastC->begin(), isFastC->end(), false);  // is fast crescendo on?
 	std::fill(isFastD->begin(), isFastD->end(), false);  // is fast decrescendo on?
 
@@ -569,9 +574,11 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 		int exp_no = me->getKeyNumber();  // expression number
 		int st = int(me->seconds * 1000.0 + 0.5);  // start time in milliseconds
 		int et = int((me->seconds + me->getDurationInSeconds()) * 1000.0 + 0.5);
+		// if (option == "right_hand"){
+		// 	printf("i: %d\t", i);
+		// 	printf("exp_no: %d\n", exp_no);
+		// }
 
-		printf("i: %d\t", i);
-		printf("exp_no: %d\n", exp_no);
 		if ((exp_no == 14) || (exp_no == 113)) {
 			// MF off
 			if (valve_mf_on) {
@@ -588,7 +595,9 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 			if (!valve_mf_on) {    // if previous has an on, ignore
 				valve_mf_on = true;
 				valve_mf_starttime = st;
-				printf("detect MF on, recording valve_mf_starttime = %d\n", valve_mf_starttime);
+				// if (option == "right_hand"){
+				// 	printf("detect MF on, recording valve_mf_starttime = %d\n", valve_mf_starttime);
+				// }
 			}
 		}
 		// detect slow crescendo on, update starttime
@@ -596,7 +605,9 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 			if (!valve_slowc_on) { // if previous has an on, ignore
 				valve_slowc_on = true;
 				valve_slowc_starttime = st;
-				printf("detect slowC on, recording valve_slowc_starttime = %d\n", valve_slowc_starttime);
+				// if (option == "right_hand"){
+				// 	printf("detect slowC on, recording valve_slowc_starttime = %d\n", valve_slowc_starttime);
+				// }
 			}
 		}
 		// detect slow decrescendo off, update isSlowC
@@ -606,8 +617,10 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 					// record Cresc Valve information for previous
 					isSlowC->at(j) = true;
 				}
-				printf("update isSlowC from %d\t", valve_slowc_starttime);
-				printf("to %d\n", st-1);
+				// if (option == "right_hand"){
+				// 	printf("update isSlowC from %d\t", valve_slowc_starttime);
+				// 	printf("to %d\n", st-1);
+				// }
 			}
 			valve_slowc_on = false;
 		}
@@ -616,11 +629,19 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 				for (int j=st; j<et; j++) {
 					isFastD->at(j) = true;
 				}
+				// if (option == "left_hand"){
+				// 	printf("Fast Decrescendo on from %d\t", st);
+				// 	printf("to %d\n", et);
+				// }
 
 		} else if ((exp_no == 19) || (exp_no == 108)) { // Forzando on -- Fast Crescendo
 				for (int j=st; j<et; j++) {
 					isFastC->at(j) = true;
 				}
+				// if (option == "left_hand"){
+				// 	printf("Fast Crecrescendo on from %d\t", st);
+				// 	printf("to %d\n", et);
+				// }
 		}
 	}
 
@@ -631,17 +652,17 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 	double amount = 0.0;
 	double eps = 0.0001;
 	//bool lowerMF = false; // If it's an MF to prevent it from traveling further
-	printf("min: %f\t", welte_p);
-	printf("max: %f\t", welte_f);
-	printf("mf: %f\t", welte_mf);
-	printf("slow_cresc_rate: %f\t", slow_decay_rate);
-	printf("fast crescendo rate: %f\t", fastC_decay_rate);
-	printf("fast-decrescendo: %f\n", fastD_decay_rate);
+	// printf("min: %f\t", welte_p);
+	// printf("max: %f\t", welte_f);
+	// printf("mf: %f\t", welte_mf);
+	// printf("slow_cresc_rate: %f\t", slow_decay_rate);
+	// printf("fast crescendo rate: %f\t", fastC_decay_rate);
+	// printf("fast-decrescendo: %f\n", fastD_decay_rate);
 
-	printf("calculation: %f\n", (welte_mf - welte_p) / slow_decay_rate);
-	printf("slowstep: %f\t", slow_step);
-	printf("fastCstep: %f\t", fastC_step);
-	printf("fastDstep: %f\n", fastD_step);
+	// printf("calculation: %f\n", (welte_mf - welte_p) / slow_decay_rate);
+	// printf("slowstep: %f\t", slow_step);
+	// printf("fastCstep: %f\t", fastC_step);
+	// printf("fastDstep: %f\n", fastD_step);
 	for (int i=1; i<exp_length; i++) {
 		if ((isSlowC->at(i) == false) && (isFastC->at(i) == false) && (isFastD->at(i) == false)) {
 			amount = -slow_step; // slow decrescendo is always on
@@ -653,17 +674,21 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 		} else {
 			amount = isSlowC->at(i) * slow_step + isFastC->at(i) * fastC_step + isFastD->at(i) * fastD_step;
 		}
-		printf("i: %d\t", i);
-		printf("amount: %f\t", amount);
-		printf("isSlowC: %f\t", isSlowC->at(i));
-		printf("isFastC: %f\t", isFastC->at(i));
-		printf("isFastD: %f\t", isFastD->at(i));
+		// if (option == "right_hand"){
+		// 	printf("i: %d\t", i);
+		// 	printf("amount: %f\t", amount);
+		// 	printf("isSlowC: %f\t", isSlowC->at(i));
+		// 	printf("isFastC: %f\t", isFastC->at(i));
+		// 	printf("isFastD: %f\t", isFastD->at(i));
+		// }
 		//cout << isSlowC->at(i) << isSlowD->at(i) << isFastD->at(i) << endl;
 		//cout << ("isSlowC: " + std::to_string(isSlowC) + '\t' + "isFastC: " + std::to_string(isFastC) + '\t' + "isFastD: " + std::to_string(isFastD))  << endl;
 
 		double newV = expression_list->at(i-1) + amount;
 		//cout << ("newV: " + std::to_string(newV)) << endl;
-		printf("newV: %f\t", newV);
+		// if (option == "right_hand"){
+		// 	printf("newV: %f\t", newV);
+		// }
 		expression_list->at(i) = newV;
 
 		if (isMF->at(i) == true) {
@@ -707,7 +732,9 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 		expression_list->at(i) = max(welte_p, expression_list->at(i));
 		expression_list->at(i) = min(welte_f, expression_list->at(i));
 		//cout << ("newV after process: " + std::to_string(expression_list->at(i))) << endl;
-		printf("newV after process: %f\n", expression_list->at(i));
+		// if (option == "right_hand"){
+		// 	printf("newV after process: %f\n", expression_list->at(i));
+		// }
 	}
 }
 
@@ -740,14 +767,16 @@ ostream& Expressionizer::printExpression(ostream& out, bool extended) {
 		out << i << "\t" << exp_bass[i];
 		if (extended) {
 			out << "\t" << isSlowC_bass[i];
+			out << "\t" << isSlowD_bass[i];
 			out << "\t" << isFastC_bass[i];
 			out << "\t" << isFastD_bass[i];
 		}
 		out << "\t" << exp_treble[i];
 		if (extended) {
-			out << "\t" << isSlowC_bass[i];
-			out << "\t" << isFastC_bass[i];
-			out << "\t" << isFastD_bass[i];
+			out << "\t" << isSlowC_treble[i];
+			out << "\t" << isSlowD_treble[i];
+			out << "\t" << isFastC_treble[i];
+			out << "\t" << isFastD_treble[i];
 		}
 		out << endl;
 	}

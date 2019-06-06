@@ -148,6 +148,7 @@ class Expressionizer {
 		std::vector<double> exp_bass;
 		std::vector<double> isMF_bass;
 		std::vector<double> isSlowC_bass;
+		std::vector<double> isSlowD_bass;
 		std::vector<double> isFastC_bass;
 		std::vector<double> isFastD_bass;
 
@@ -155,6 +156,7 @@ class Expressionizer {
 		std::vector<double> exp_treble;
 		std::vector<double> isMF_treble;
 		std::vector<double> isSlowC_treble;
+		std::vector<double> isSlowD_treble;
 		std::vector<double> isFastC_treble;
 		std::vector<double> isFastD_treble;
 
@@ -164,9 +166,9 @@ class Expressionizer {
 		//double fastD_decay_rate = 150.0 * 2.2;
 		// experiment 0411
 		// v1:
-		double slow_decay_rate  = 2380;  //2380
+		double slow_decay_rate  = 1460;  //2380
 		double fastC_decay_rate = 300; // test roll shows around 170ms-200ms from min to MF hook
-		double fastD_decay_rate = 400; // test roll shows 166ms -- 300ms at max 400ms fast decrescendo can bring Max down to Min
+		double fastD_decay_rate = 300; // test roll shows 166ms -- 300ms at max 400ms fast decrescendo can bring Max down to Min
 		// before 0411
 		// double slow_decay_rate  = 2380.0 * 4.0;
 		// double fastC_decay_rate = 700.0; //1050.0;

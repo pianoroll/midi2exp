@@ -36,9 +36,9 @@ int main(int argc, char** argv) {
 	options.define("sd|slow-decay-rate=d:2380", "Slow decay rate (Red Welte)"); // 2380
 	options.define("fc|fast-crescendo=d:300", "Fast crescendo (Red Welte)");    //180 --> 300
 	options.define("fd|fast-decrescendo=d:300", "Fast descrescendo (Red Welte)"); //17 ---> 300
-	options.define("wp|welte-piano=d:23.0", "(Red Welte)");
+	options.define("wp|welte-piano=d:38.0", "(Red Welte)");
 	options.define("wmf|welte-mezzo-forte=d:60.0", "(Red Welte)");
-	options.define("wf|welte-forte=d:89.0", "(Red Welte)");
+	options.define("wf|welte-forte=d:80.0", "(Red Welte)");
 	options.define("wl|welte-loud=d:70.0", "(Red Welte)");
 
 	options.process(argc, argv);

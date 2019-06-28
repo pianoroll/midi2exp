@@ -90,10 +90,10 @@ class Expressionizer {
 		double        getPreviousNonzero           (std::vector<double>& myArray, int start_index);
 	private:
 
-		double welte_p        = 38.0;  // 38.0
-		double welte_mf       = 60.0;
-		double welte_f        = 85.0;  // 85.0
-		double welte_loud     = 70.0;
+		double welte_p        = 35.0;  // 38.0
+		double welte_mf       = 65.0;
+		double welte_f        = 90.0;  // 85.0
+		double welte_loud     = 75.0;
 		double cresc_rate     = 1.0;
 
 		double punch_width    = 21.5;  // diameter of the hole punches (in pixels/ticks)
@@ -166,8 +166,18 @@ class Expressionizer {
 		//double fastD_decay_rate = 150.0 * 2.2;
 		// experiment 0411
 		// v1:
-		double slow_decay_rate  = 1460;  //2380
-		double fastC_decay_rate = 300; // test roll shows around 170ms-200ms from min to MF hook
+		double slow_decay_rate  = 2380;  //2380
+		// y = sc_A + sc_B * ln(sc_C + t), t = 0..5000
+		double sc_A = -70.1;
+		double sc_B = 16.9;
+		double sc_C = 500;
+
+		// y = sd_A + sd_B * ln(sd_D - t), t = 0..2875
+		double sd_A = -70.1;
+		double sd_B = 16.9;
+		double sd_C = 2875;
+
+		double fastC_decay_rate = 250; // test roll shows around 170ms-200ms from min to MF hook
 		double fastD_decay_rate = 300; // test roll shows 166ms -- 300ms at max 400ms fast decrescendo can bring Max down to Min
 		// before 0411
 		// double slow_decay_rate  = 2380.0 * 4.0;

@@ -18,7 +18,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <ctime>
+#include <cmath>
 
 using namespace std;
 using namespace smf;
@@ -651,38 +651,59 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 
 	double amount = 0.0;
 	double eps = 0.0001;
-	//bool lowerMF = false; // If it's an MF to prevent it from traveling further
-	// printf("min: %f\t", welte_p);
-	// printf("max: %f\t", welte_f);
-	// printf("mf: %f\t", welte_mf);
-	// printf("slow_cresc_rate: %f\t", slow_decay_rate);
-	// printf("fast crescendo rate: %f\t", fastC_decay_rate);
-	// printf("fast-decrescendo: %f\n", fastD_decay_rate);
+	bool isSlowC_first = false;
+    int slowC_t0 = 0;
+    double slowC_sum = 0.0;
 
-	// printf("calculation: %f\n", (welte_mf - welte_p) / slow_decay_rate);
-	// printf("slowstep: %f\t", slow_step);
-	// printf("fastCstep: %f\t", fastC_step);
-	// printf("fastDstep: %f\n", fastD_step);
 	for (int i=1; i<exp_length; i++) {
 		if ((isSlowC->at(i) == false) && (isFastC->at(i) == false) && (isFastD->at(i) == false)) {
-			amount = -slow_step; // slow decrescendo is always on
-
-		// if both slow crescendo and fast crescendo
-		//elif isSlowC->at(i) == 1 and isFastC->at(i) == 1:
-		//    amount = self.slow_step + self.fastC_step
-
+			amount = -slow_step;  // slow_decresc_rate + 500
+            slowC_sum = 0.0;
+            slowC_t0 = i;
 		} else {
-			amount = isSlowC->at(i) * slow_step + isFastC->at(i) * fastC_step + isFastD->at(i) * fastD_step;
-		}
-		// if (option == "right_hand"){
-		// 	printf("i: %d\t", i);
-		// 	printf("amount: %f\t", amount);
-		// 	printf("isSlowC: %f\t", isSlowC->at(i));
-		// 	printf("isFastC: %f\t", isFastC->at(i));
-		// 	printf("isFastD: %f\t", isFastD->at(i));
+            amount = isFastC->at(i) * fastC_step + isFastD->at(i) * fastD_step;
+            //cout << "amount: " << amount << endl;
+            //amount += slow_step;
+            // cout << "amount without slowC: " << amount << endl;
+            if (isSlowC->at(i)){
+            	// cout << "isSlowC on at " << i << endl;
+                if (isSlowC_first == false){
+                    isSlowC_first = true;
+                    // cout << "isSlowC_first = true, slowC_t0 = " << i << endl;
+                    slowC_t0 = i;
+                    slowC_sum = 0.0;
+                }
+                // new_t = i - slow_t0
+                // amount += f(new_t) - f(new_t-1)
+                //double aaa = sc_B * log(sc_C + i-slowC_t0);
+
+                if (i >= slowC_t0) {
+                	double aaa = sc_B * log(sc_C + i-slowC_t0) - sc_B * log(sc_C + i-slowC_t0-1) ;
+                	amount += aaa;
+                	slowC_sum += aaa;
+                	//cout << "new_t: " << (i-slowC_t0) << " aaa: " << aaa << " sum: " << slowC_sum <<  " i: " << i << " slowC_t0: " << slowC_t0 << endl;
+                }
+            }
+            else{
+                isSlowC_first = false;
+                slowC_sum = 0.0;
+                slowC_t0 = i;
+            }
+
+			// if ( i >= 412055 && i <= 412060) {
+   //          	cout << "new_t: " << (i-slowC_t0) << " sum: " << slowC_sum <<  " i: " << i << " slowC_t0: " << slowC_t0 << " isSlowC->at(i): " << isSlowC->at(i)<< endl;
+			// }
+
+        }
+
+
+		// if ((isSlowC->at(i) == false) && (isFastC->at(i) == false) && (isFastD->at(i) == false)) {
+		// 	amount = -slow_step; // slow decrescendo is always on
+
+		// } else {
+		// 	amount = isSlowC->at(i) * slow_step + isFastC->at(i) * fastC_step + isFastD->at(i) * fastD_step;
 		// }
-		//cout << isSlowC->at(i) << isSlowD->at(i) << isFastD->at(i) << endl;
-		//cout << ("isSlowC: " + std::to_string(isSlowC) + '\t' + "isFastC: " + std::to_string(isFastC) + '\t' + "isFastD: " + std::to_string(isFastD))  << endl;
+
 
 		double newV = expression_list->at(i-1) + amount;
 		//cout << ("newV: " + std::to_string(newV)) << endl;

@@ -657,13 +657,7 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 	for (int i=1; i<exp_length; i++) {
 		// linear method, always decrescendo on
 		amount = slowD_step + isSlowC->at(i) * slowC_step + isFastC->at(i) * fastC_step + isFastD->at(i) * fastD_step;
-		// linear method
-		// if ((isSlowC->at(i) == false) && (isFastC->at(i) == false) && (isFastD->at(i) == false)) {
-		// 	amount = -slow_step; // slow decrescendo is always on
 
-		// } else {
-		// 	amount = isSlowC->at(i) * slow_step + isFastC->at(i) * fastC_step + isFastD->at(i) * fastD_step;
-		// }
 		// compute the amount using non-linear fitting for slow-crescendo
 		// if ((isSlowC->at(i) == false) && (isFastC->at(i) == false) && (isFastD->at(i) == false)) {
 		// 	amount = -slow_step;  // slow_decresc_rate + 500
@@ -705,9 +699,6 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
         //         slowC_t0 = i;
         //     }
         // }
-
-
-
 
 		double newV = expression_list->at(i-1) + amount;
 		//cout << ("newV: " + std::to_string(newV)) << endl;

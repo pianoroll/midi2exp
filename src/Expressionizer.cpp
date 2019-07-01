@@ -80,6 +80,7 @@ Expressionizer::~Expressionizer(void) {
 void Expressionizer::addExpression(void) {
 	setPan();
 
+	midi_data.applyAcceleration(12, 0.22);
 	calculateRedWelteExpression("left_hand");
 	calculateRedWelteExpression("right_hand");
 
@@ -679,6 +680,8 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 
                 if (i >= slowC_t0) {
                 	double aaa = sc_B * log(sc_C + i-slowC_t0) - sc_B * log(sc_C + i-slowC_t0-1) ;
+                	// using first order approximation
+                	//double aaa = sc_B / ((i-slowC_t0-1.0)+ 500.0);
                 	amount += aaa;
                 	slowC_sum += aaa;
                 	//cout << "new_t: " << (i-slowC_t0) << " aaa: " << aaa << " sum: " << slowC_sum <<  " i: " << i << " slowC_t0: " << slowC_t0 << endl;
@@ -756,7 +759,9 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 		// if (option == "right_hand"){
 		// 	printf("newV after process: %f\n", expression_list->at(i));
 		// }
+		//cout << expression_list->at(i) << endl;
 	}
+
 }
 
 

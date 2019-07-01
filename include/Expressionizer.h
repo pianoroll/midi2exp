@@ -166,7 +166,7 @@ class Expressionizer {
 		//double fastD_decay_rate = 150.0 * 2.2;
 		// experiment 0411
 		// v1:
-		double slow_decay_rate  = 2380;  //2380
+		double slow_decay_rate  = 1460;  //2380
 		// y = sc_A + sc_B * ln(sc_C + t), t = 0..5000
 		double sc_A = -70.1;
 		double sc_B = 16.9;

@@ -61,7 +61,7 @@ int main(int argc, char** argv) {
 	}
 
 	if (options.getBoolean("red-welte")) {
-		//creator.setRollTempo(104.331);    // old tempo: 98.4252
+		// between 95-98
 		//creator.setRollTempo(98.4252);
 		creator.setRollTempo(95);
 	} else if (options.getBoolean("tempo")) {

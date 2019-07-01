@@ -41,10 +41,8 @@ Expressionizer::Expressionizer(void) {
 //
 
 void Expressionizer::setupRedWelte(void) {
-	// slow_step   =  cresc_rate * welte_mf / slow_decay_rate;
-	// fastC_step  =  cresc_rate * (welte_f - welte_p) / fastC_decay_rate;
-	// fastD_step  = -cresc_rate * (welte_f - welte_p) / fastD_decay_rate;
-	slow_step   =   (welte_mf - welte_p) / slow_decay_rate;
+	slowC_step  =   (welte_mf - welte_p) / slow_cresc_rate;
+	slowD_step  = - (welte_mf - welte_p) / slow_decay_rate;
 	fastC_step  =   (welte_mf - welte_p) / fastC_decay_rate;
 	fastD_step  = - (welte_f - welte_p)  / fastD_decay_rate;
 	// cerr << "CRESC_RATE " << cresc_rate << endl;
@@ -435,9 +433,9 @@ void Expressionizer::applyExpression(std::string option) {
 			velocity = std::max(velocity + left_adjust, 0);
 		}
 
-		// if still equals 0, map it to 60
+		// if still equals 0, map it to minimum velocity
 		if (velocity == 0) {
-			velocity = 60;
+			velocity = welte_p;
 		}
 
 		me->setVelocity(velocity);
@@ -657,55 +655,58 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
     double slowC_sum = 0.0;
 
 	for (int i=1; i<exp_length; i++) {
-		if ((isSlowC->at(i) == false) && (isFastC->at(i) == false) && (isFastD->at(i) == false)) {
-			amount = -slow_step;  // slow_decresc_rate + 500
-            slowC_sum = 0.0;
-            slowC_t0 = i;
-		} else {
-            amount = isFastC->at(i) * fastC_step + isFastD->at(i) * fastD_step;
-            //cout << "amount: " << amount << endl;
-            //amount += slow_step;
-            // cout << "amount without slowC: " << amount << endl;
-            if (isSlowC->at(i)){
-            	// cout << "isSlowC on at " << i << endl;
-                if (isSlowC_first == false){
-                    isSlowC_first = true;
-                    // cout << "isSlowC_first = true, slowC_t0 = " << i << endl;
-                    slowC_t0 = i;
-                    slowC_sum = 0.0;
-                }
-                // new_t = i - slow_t0
-                // amount += f(new_t) - f(new_t-1)
-                //double aaa = sc_B * log(sc_C + i-slowC_t0);
-
-                if (i >= slowC_t0) {
-                	double aaa = sc_B * log(sc_C + i-slowC_t0) - sc_B * log(sc_C + i-slowC_t0-1) ;
-                	// using first order approximation
-                	//double aaa = sc_B / ((i-slowC_t0-1.0)+ 500.0);
-                	amount += aaa;
-                	slowC_sum += aaa;
-                	//cout << "new_t: " << (i-slowC_t0) << " aaa: " << aaa << " sum: " << slowC_sum <<  " i: " << i << " slowC_t0: " << slowC_t0 << endl;
-                }
-            }
-            else{
-                isSlowC_first = false;
-                slowC_sum = 0.0;
-                slowC_t0 = i;
-            }
-
-			// if ( i >= 412055 && i <= 412060) {
-   //          	cout << "new_t: " << (i-slowC_t0) << " sum: " << slowC_sum <<  " i: " << i << " slowC_t0: " << slowC_t0 << " isSlowC->at(i): " << isSlowC->at(i)<< endl;
-			// }
-
-        }
-
-
+		// linear method, always decrescendo on
+		amount = slowD_step + isSlowC->at(i) * slowC_step + isFastC->at(i) * fastC_step + isFastD->at(i) * fastD_step;
+		// linear method
 		// if ((isSlowC->at(i) == false) && (isFastC->at(i) == false) && (isFastD->at(i) == false)) {
 		// 	amount = -slow_step; // slow decrescendo is always on
 
 		// } else {
 		// 	amount = isSlowC->at(i) * slow_step + isFastC->at(i) * fastC_step + isFastD->at(i) * fastD_step;
 		// }
+		// compute the amount using non-linear fitting for slow-crescendo
+		// if ((isSlowC->at(i) == false) && (isFastC->at(i) == false) && (isFastD->at(i) == false)) {
+		// 	amount = -slow_step;  // slow_decresc_rate + 500
+  //           slowC_sum = 0.0;
+  //           slowC_t0 = i;
+		// } else {
+  //           amount = isFastC->at(i) * fastC_step + isFastD->at(i) * fastD_step;
+            //cout << "amount: " << amount << endl;
+            //amount += slow_step;
+            // cout << "amount without slowC: " << amount << endl;
+        //     if (isSlowC->at(i)){
+        //     	// cout << "isSlowC on at " << i << endl;
+        //         if (isSlowC_first == false){
+        //             isSlowC_first = true;
+        //             // cout << "isSlowC_first = true, slowC_t0 = " << i << endl;
+        //             slowC_t0 = i;
+        //             slowC_sum = 0.0;
+        //         }
+        //         // new_t = i - slow_t0
+        //         // amount += f(new_t) - f(new_t-1)
+        //         //double aaa = sc_B * log(sc_C + i-slowC_t0);
+
+        //         if (i >= slowC_t0) {
+        //         	// =67.62765+(34.79438-67.62765)/(1+(L1/1861.557)^4.869496)
+        //         	double after  = (35.30282-69.40928)/(1 + pow((i-slowC_t0  ) / 1202.475, 2.808176));
+        //         	double before = (35.30282-69.40928)/(1 + pow((i-slowC_t0-1) / 1202.475, 2.808176));
+        //         	double aaa = after - before;
+        //         	// double aaa = sc_B * log(sc_C + i-slowC_t0) - sc_B * log(sc_C + i-slowC_t0-1) ;
+        //         	// using first order approximation
+        //         	//double aaa = sc_B / ((i-slowC_t0-1.0)+ 500.0);
+        //         	amount += aaa;
+        //         	slowC_sum += aaa;
+        //         	//cout << "new_t: " << (i-slowC_t0) << " aaa: " << aaa << " sum: " << slowC_sum <<  " i: " << i << " slowC_t0: " << slowC_t0 << endl;
+        //         }
+        //     }
+        //     else{
+        //         isSlowC_first = false;
+        //         slowC_sum = 0.0;
+        //         slowC_t0 = i;
+        //     }
+        // }
+
+
 
 
 		double newV = expression_list->at(i-1) + amount;
@@ -715,6 +716,12 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 		// }
 		expression_list->at(i) = newV;
 
+      //   if (i > 2900 && i < 3200) {
+	    	// cout << "i: " << i << " amount: " << amount << " newV:" << newV << endl;
+      //   }
+
+
+        // clipping
 		if (isMF->at(i) == true) {
 			if (expression_list->at(i-1) > welte_mf){
 				if (amount < 0) {
@@ -760,6 +767,15 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 		// 	printf("newV after process: %f\n", expression_list->at(i));
 		// }
 		//cout << expression_list->at(i) << endl;
+	}
+
+	//convert from windchest pressure to midi velocity using nonlinear function
+	// for (int i=0; i<exp_length; i++) {
+	// 	expression_list->at(i) = -155 + 54.3 * log(expression_list->at(i));
+	// }
+	//convert from windchest pressure to midi velocity using nonlinear function
+	for (int i=0; i<exp_length; i++) {
+		expression_list->at(i) = -151 + 52 * log(expression_list->at(i));
 	}
 
 }
@@ -1017,6 +1033,16 @@ void Expressionizer::setWelteLoud(double value) {
 	welte_loud = value;
 }
 
+
+///////////////////////////////
+//
+// Expressionizer::setSlowCrescRate -- Set expresion information for red Welte rolls.
+//
+
+void Expressionizer::setSlowCrescRate(double value) {
+	//slow_step = value;
+	slow_cresc_rate = value;
+}
 
 
 ///////////////////////////////

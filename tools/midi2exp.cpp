@@ -33,12 +33,13 @@ int main(int argc, char** argv) {
 	options.define("x|display-extended-expression-info=b", "display booleans needed to create expression");
 	options.define("w|red-welte=b:", "set tempo for red welte rolls");
 
+	options.define("sc|slow-cresc-rate=d:1190", "Slow cresc rate (Red Welte)"); // 2380
 	options.define("sd|slow-decay-rate=d:2380", "Slow decay rate (Red Welte)"); // 2380
 	options.define("fc|fast-crescendo=d:300", "Fast crescendo (Red Welte)");    //180 --> 300
 	options.define("fd|fast-decrescendo=d:300", "Fast descrescendo (Red Welte)"); //17 ---> 300
-	options.define("wp|welte-piano=d:38.0", "(Red Welte)");
-	options.define("wmf|welte-mezzo-forte=d:60.0", "(Red Welte)");
-	options.define("wf|welte-forte=d:80.0", "(Red Welte)");
+	options.define("wp|welte-piano=d:35.0", "(Red Welte)");
+	options.define("wmf|welte-mezzo-forte=d:65.0", "(Red Welte)");
+	options.define("wf|welte-forte=d:90.0", "(Red Welte)");
 	options.define("wl|welte-loud=d:70.0", "(Red Welte)");
 
 	options.process(argc, argv);
@@ -63,7 +64,7 @@ int main(int argc, char** argv) {
 	if (options.getBoolean("red-welte")) {
 		// between 95-98
 		//creator.setRollTempo(98.4252);
-		creator.setRollTempo(95);
+		creator.setRollTempo(94.6);
 	} else if (options.getBoolean("tempo")) {
 		creator.setRollTempo(options.getDouble("tempo"));
 	}

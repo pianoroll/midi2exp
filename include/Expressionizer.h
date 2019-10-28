@@ -91,10 +91,18 @@ class Expressionizer {
 		double        getPreviousNonzero           (std::vector<double>& myArray, int start_index);
 	private:
 
+		// verion 1 (more approximate Wayne)
+		// double welte_p        = 35.0;  // maps to 35 in MIDI velocity
+		// double welte_mf       = 65.0;  // maps to 65 in MIDI velocity
+		// double welte_f        = 80.0;  // maps to 85 in MIDI velocity
+		// double welte_loud     = 70.0;  // maps to 70 in MIDI velocity
+
+		// verion 2
 		double welte_p        = 35.0;  // maps to 35 in MIDI velocity
-		double welte_mf       = 65.0;  // maps to 65 in MIDI velocity
-		double welte_f        = 80.0;  // maps to 85 in MIDI velocity
-		double welte_loud     = 70.0;  // maps to 70 in MIDI velocity
+		double welte_mf       = 45.0;  // maps to 65 in MIDI velocity
+		double welte_f        = 90.0;  // maps to 85 in MIDI velocity
+		double welte_loud     = 60.0;  // maps to 70 in MIDI velocity
+
 
 		double punch_width    = 21.5;  // diameter of the hole punches (in pixels/ticks)
 		double punch_fraction = 0.75;  // extention length of holes (0.75 = 75% longer)

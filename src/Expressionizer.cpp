@@ -764,9 +764,18 @@ void Expressionizer::calculateRedWelteExpression(std::string option) {
 	// for (int i=0; i<exp_length; i++) {
 	// 	expression_list->at(i) = -155 + 54.3 * log(expression_list->at(i));
 	// }
-	//convert from windchest pressure to midi velocity using nonlinear function
+	//verion 1 convert from windchest pressure to midi velocity using nonlinear function
 	for (int i=0; i<exp_length; i++) {
-		expression_list->at(i) = -151 + 52 * log(expression_list->at(i));
+		expression_list->at(i) = -149 + 54.3 * log(expression_list->at(i));  // June 2019 -151 + 52*log(expression_list->at(i))
+
+	//version 2 using Peter's mapping
+	// for (int i=0; i<exp_length; i++) {
+	// 	cout << expression_list->at(i) << endl;
+	// 	if ((expression_list->at(i) > welte_p) && (expression_list->at(i) < welte_f)){
+	//  		expression_list->at(i) = 94.99724 *(-57821440 - 94.99724)/(1 + pow(expression_list->at(i)/0.1433096,2.504967));
+	//  	}
+	//  	cout << expression_list->at(i) << endl;
+ //    }
 	}
 
 }

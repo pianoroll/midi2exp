@@ -288,6 +288,10 @@ void Expressionizer::setPan(void) {
 
 bool Expressionizer::readMidiFile(std::string filename) {
 	bool status =  midi_data.read(filename);
+	if (midi_data.getTrackCount() != 5) {
+		cerr << "Error: expected 5 tracks, but found " << midi_data.getTrackCount() << endl;
+		exit(1);
+	}
 	if (!status) {
 		return status;
 	}
@@ -322,8 +326,10 @@ bool Expressionizer::writeMidiFile(std::string filename) {
 
 	addMetadata();
 
+	midi_data.sortTracks();
 	return midi_data.write(filename);
 }
+
 
 
 //////////////////////////////
@@ -894,7 +900,7 @@ bool Expressionizer::setPianoTimbre(void) {
 	int tick = 0;
 	int timbre = 0;
 	if (timbre1) {
-		timbre1->setP2(timbre);
+		timbre1->setP1(timbre);
 	} else {
 		track = 1;
 		channel = 1;
@@ -903,7 +909,7 @@ bool Expressionizer::setPianoTimbre(void) {
 	}
 
 	if (timbre2) {
-		timbre2->setP2(timbre);
+		timbre2->setP1(timbre);
 	} else {
 		track = 2;
 		channel = 2;

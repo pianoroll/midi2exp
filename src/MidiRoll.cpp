@@ -331,38 +331,22 @@ void MidiRoll::removeAcceleration (void) {
 //    to the input paramters.
 // default values:
 //      inches  = 12.0;
-//      percent = 0.22;
+//      percent = 0.04;
 //
+
 void MidiRoll::applyAcceleration(double inches, double percent) {
 	removeAcceleration();  // adds first tempo at 60.0
-	double INIT_TEMPO = 60.0;
 	double factor  = 1.0 + percent / 100.0;
 	int    maxtick = getMaxTick();
-	double step    = getLengthDpi() * inches; 	// how many pixels
+	double step    = getLengthDpi() * inches;
 	int    count   = int(maxtick / step);
-	double tempo   = INIT_TEMPO * factor;
+	double tempo   = 60.0 * factor;
 	for (int i=1; i<count; i++) {
 		addTempo(0, (int)(i*step+0.5), tempo);
-		factor += percent / 100.0;
-		tempo = INIT_TEMPO * factor;
+		tempo *= factor;
 	}
 	sortTrack(0);
 }
-
-
-// void MidiRoll::applyAcceleration(double inches, double percent) {
-// 	removeAcceleration();  // adds first tempo at 60.0
-// 	double factor  = 1.0 + percent / 100.0;
-// 	int    maxtick = getMaxTick();
-// 	double step    = getLengthDpi() * inches;
-// 	int    count   = int(maxtick / step);
-// 	double tempo   = 60.0 * factor;
-// 	for (int i=1; i<count; i++) {
-// 		addTempo(0, (int)(i*step+0.5), tempo);
-// 		tempo *= factor;
-// 	}
-// 	sortTrack(0);
-// }
 
 
 

@@ -68,7 +68,6 @@ class Expressionizer {
 		void          setWelteMF                   (double value);
 		void          setWelteF                    (double value);
 		void          setWelteLoud                 (double value);
-		void          setSlowCrescRate             (double value);
 		void          setSlowDecayRate             (double value);
 		void          setFastCrescendo             (double value);
 		void          setFastDecrescendo           (double value);
@@ -91,18 +90,11 @@ class Expressionizer {
 		double        getPreviousNonzero           (std::vector<double>& myArray, int start_index);
 	private:
 
-		// verion 1 (more approximate Wayne)
-		// double welte_p        = 35.0;  // maps to 35 in MIDI velocity
-		// double welte_mf       = 65.0;  // maps to 65 in MIDI velocity
-		// double welte_f        = 80.0;  // maps to 85 in MIDI velocity
-		// double welte_loud     = 70.0;  // maps to 70 in MIDI velocity
-
-		// verion 2
-		double welte_p        = 35.0;  // maps to 35 in MIDI velocity
-		double welte_mf       = 45.0;  // maps to 65 in MIDI velocity
-		double welte_f        = 90.0;  // maps to 85 in MIDI velocity
-		double welte_loud     = 60.0;  // maps to 70 in MIDI velocity
-
+		double welte_p        = 38.0;  // 38.0
+		double welte_mf       = 60.0;
+		double welte_f        = 85.0;  // 85.0
+		double welte_loud     = 70.0;
+		double cresc_rate     = 1.0;
 
 		double punch_width    = 21.5;  // diameter of the hole punches (in pixels/ticks)
 		double punch_fraction = 0.75;  // extention length of holes (0.75 = 75% longer)
@@ -114,7 +106,7 @@ class Expressionizer {
 		bool delete_expresison_tracks = false;
 
 		// left_adjust: reduce loudness of bass register (for attack velocities)
-		int left_adjust       = 0;
+		int left_adjust       = -5;
 
 		double time_scale     = 1.0;
 
@@ -148,8 +140,7 @@ class Expressionizer {
 		int bass_exp_ch       = 0; // channel number of bass notes expression
 		int treble_exp_ch     = 3; // channel number of treble notes expression
 
-		double slowC_step      = -1000;
-		double slowD_step      = -1000;
+		double slow_step      = -1000;
   		double fastC_step     = -1000;
   		double fastD_step     = -1000;
 
@@ -157,7 +148,6 @@ class Expressionizer {
 		std::vector<double> exp_bass;
 		std::vector<double> isMF_bass;
 		std::vector<double> isSlowC_bass;
-		std::vector<double> isSlowD_bass;
 		std::vector<double> isFastC_bass;
 		std::vector<double> isFastD_bass;
 
@@ -165,7 +155,6 @@ class Expressionizer {
 		std::vector<double> exp_treble;
 		std::vector<double> isMF_treble;
 		std::vector<double> isSlowC_treble;
-		std::vector<double> isSlowD_treble;
 		std::vector<double> isFastC_treble;
 		std::vector<double> isFastD_treble;
 
@@ -173,24 +162,11 @@ class Expressionizer {
 		//double slow_decay_rate  = 2380.0 * 2.0;
 		//double fastC_decay_rate = 170.0;
 		//double fastD_decay_rate = 150.0 * 2.2;
-
-		double slow_cresc_rate = 1190;
+		// experiment 0411
+		// v1:
 		double slow_decay_rate  = 2380;  //2380
-		// y = sc_A + sc_B * ln(sc_C + t), t = 0..5000
-		double sc_A = -70.1;
-		double sc_B = 16.9;
-		double sc_C = 500;
-		// double sc_A = -89.3;
-		// double sc_B = 18.9;
-		// double sc_C = 700;
-
-		// y = sd_A + sd_B * ln(sd_D - t), t = 0..2875
-		double sd_A = -70.1;
-		double sd_B = 16.9;
-		double sd_C = 2875;
-
-		double fastC_decay_rate = 310; // test roll shows around 170ms-200ms from min to MF hook
-		double fastD_decay_rate = 200; // test roll shows 166ms -- 300ms at max 400ms fast decrescendo can bring Max down to Min
+		double fastC_decay_rate = 300; // test roll shows around 170ms-200ms from min to MF hook
+		double fastD_decay_rate = 400; // test roll shows 166ms -- 300ms at max 400ms fast decrescendo can bring Max down to Min
 		// before 0411
 		// double slow_decay_rate  = 2380.0 * 4.0;
 		// double fastC_decay_rate = 700.0; //1050.0;

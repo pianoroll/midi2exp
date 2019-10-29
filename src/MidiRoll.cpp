@@ -331,7 +331,7 @@ void MidiRoll::removeAcceleration (void) {
 //    to the input paramters.
 // default values:
 //      inches  = 12.0;
-//      percent = 0.04;
+//      percent = 0.04;  ---> 0.22
 //
 
 void MidiRoll::applyAcceleration(double inches, double percent) {
@@ -343,7 +343,9 @@ void MidiRoll::applyAcceleration(double inches, double percent) {
 	double tempo   = 60.0 * factor;
 	for (int i=1; i<count; i++) {
 		addTempo(0, (int)(i*step+0.5), tempo);
-		tempo *= factor;
+		//tempo *= factor;
+		factor += percent / 100.0;
+		tempo = 60 * factor;
 	}
 	sortTrack(0);
 }

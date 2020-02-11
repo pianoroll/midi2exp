@@ -59,8 +59,10 @@ class Expressionizer {
 		void          removeExpressionTracksOnWrite(void);
 		bool          setPianoTimbre               (void);
 
-		void          addSustainPedalling          (int sourcetrack, int onkey, int offkey);
-		void          addSoftPedalling             (int sourcetrack, int onkey, int offkey);
+		// void          addSustainPedalling          (int sourcetrack, int onkey, int offkey);
+		// void          addSoftPedalling             (int sourcetrack, int onkey, int offkey);
+		void          addSustainPedalling          (int sourcetrack, int onkey);
+		void          addSoftPedalling             (int sourcetrack, int onkey);
 
 		void          setupRedWelte                (void);
 
@@ -89,6 +91,7 @@ class Expressionizer {
 		void          addMetadata                  (void);
 		bool          hasControllerInTrack         (int track, int controller);
 		void          calculateRedWelteExpression  (std::string option);
+		void          calculateWelteGreenExpression(std::string option);
 		void          applyExpression              (std::string option);
 		double        getPreviousNonzero           (std::vector<double>& myArray, int start_index);
 	private:

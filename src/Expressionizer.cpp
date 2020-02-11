@@ -53,10 +53,19 @@ void Expressionizer::setupRedWelte(void) {
 	// cerr << "FASTD STEP " << fastD_step << endl;
 
 	// expression keys for Red Welte rolls:
-	PedalOnKey     = 106;
-	PedalOffKey    = 107;
-	SoftOnKey      = 21;
-	SoftOffKey     = 20;
+	// PedalOnKey     = 106;
+	// PedalOffKey    = 107;
+	// SoftOnKey      = 21;
+	// SoftOffKey     = 20;
+
+	// expression keys for Green Welte rolls:
+	// if Welte_Green
+	PedalOnKey     = 18;
+	SoftOnKey      = 111;
+	//PedalOffKey    = 107;
+	//SoftOnKey      = 21;
+	//SoftOffKey     = 20;
+
 }
 
 
@@ -100,14 +109,18 @@ void Expressionizer::addExpression(void) {
 	setPan();
 	midi_data.applyAcceleration(m_inches, m_percent);
 
-	calculateRedWelteExpression("left_hand");
-	calculateRedWelteExpression("right_hand");
+	// calculateRedWelteExpression("left_hand");
+	// calculateRedWelteExpression("right_hand");
+	calculateWelteGreenExpression("left_hand");
+	calculateWelteGreenExpression("right_hand");
 
 	applyExpression("left_hand");
 	applyExpression("right_hand");
 
-	addSustainPedalling(treble_exp_track, PedalOnKey, PedalOffKey);
-	addSoftPedalling(bass_exp_track, SoftOnKey, SoftOffKey);
+	// addSustainPedalling(treble_exp_track, PedalOnKey, PedalOffKey);
+	// addSoftPedalling(bass_exp_track, SoftOnKey, SoftOffKey);
+	addSustainPedalling(treble_exp_track, PedalOnKey);
+	addSoftPedalling(bass_exp_track, SoftOnKey);
 }
 
 
@@ -119,7 +132,7 @@ void Expressionizer::addExpression(void) {
 //    bass and treble note channels/tracks.
 //
 
-void Expressionizer::addSustainPedalling(int sourcetrack, int onkey, int offkey) {
+void Expressionizer::addSustainPedalling(int sourcetrack, int onkey) {
 	MidiRoll& midifile = midi_data;
 	const int pedal_controller = 64;  // sustain pedal
 
@@ -150,10 +163,13 @@ void Expressionizer::addSustainPedalling(int sourcetrack, int onkey, int offkey)
 		if (key == onkey) {
 			midifile.addController(bass_track,   tick, bass_ch,   pedal_controller, 127);
 			midifile.addController(treble_track, tick, treble_ch, pedal_controller, 127);
-		} else if (key == offkey) {
-			midifile.addController(bass_track,   tick, bass_ch,   pedal_controller, 0);
-			midifile.addController(treble_track, tick, treble_ch, pedal_controller, 0);
 		}
+		//midifile.addController(bass_track,   tick+1, bass_ch,   pedal_controller, 0);
+		//midifile.addController(treble_track, tick+1, treble_ch, pedal_controller, 0);
+		// } else if (key == offkey) {
+		// 	midifile.addController(bass_track,   tick, bass_ch,   pedal_controller, 0);
+		// 	midifile.addController(treble_track, tick, treble_ch, pedal_controller, 0);
+		// }
 	}
 	midifile.sortTracks();
 }
@@ -165,7 +181,8 @@ void Expressionizer::addSustainPedalling(int sourcetrack, int onkey, int offkey)
 // Expressionizer::addSoftPedalling --
 //
 
-void Expressionizer::addSoftPedalling(int sourcetrack, int onkey, int offkey) {
+// void Expressionizer::addSoftPedalling(int sourcetrack, int onkey, int offkey) {
+void Expressionizer::addSoftPedalling(int sourcetrack, int onkey) {
 	MidiRoll& midifile = midi_data;
 	const int pedal_controller = 67;  // soft pedal
 
@@ -511,6 +528,254 @@ double Expressionizer::getPreviousNonzero(vector<double>& myArray,
 	}
 	// Could not find a previous value; return welte_mf:
 	return welte_mf;
+}
+
+
+
+
+//////////////////////////////
+//
+// Expressionizer::calculateRedWelteExpression --
+//
+//		As of 2018-04-06, some modification (F: fast crescendo -- length
+//    of perforation) (F+slow crescendo: fastest crescendo)
+//		Using Peter's velocity mapping: min30 MF60 Loud70 Max85
+//		dynamic range default 1.2, making welte_mf: 80, Max (F): 96, and Min (P) 66
+//		left_hand: 12 less than right hand
+//
+//		According to the following expression code of Red Welte
+//		Midi track 3 (zero offset):
+//		   14: (1)Bass MF off
+//		   15: (2)Bass MF on
+//		   16: (3)Bass Crescendo off (Slow Crescendo)
+//		   17: (4)Bass Crescendo on
+//		   18: (5)Bass Forzando off  (Fast Crescendo)
+//		   19: (6)Bass Forzando on
+//		   20: (7)Soft-pedal off
+//		   21: (8)Soft-pedal on
+//		   22: Motor off
+//		   23: Motor on
+//
+//		Midi track 4 (zero offset):
+//		   104: Rewind
+//		   105: Electric cutoff
+//		   106: (8)Sustain pedal on
+//		   107: (7)Sustain pedal off
+//		   108: (6)Treble Forzando on   (Fast Crescendo)
+//		   109: (5)Treble Forzando off
+//		   110: (4)Treble Crescendo on  (Slow Crescendo)
+//		   111: (3)Treble Crescendo off
+//		   112: (2)Treble MF on
+//		   113: (1)Treble MF off
+//
+//    pianoside = "left_hand" or "right_hand";
+//
+
+void Expressionizer::calculateWelteGreenExpression(std::string option) {
+	int track_index;
+	vector<double>* expression_list;
+	vector<double>* isMF;
+	vector<double>* isSlowC;
+	vector<double>* isFastC;
+	vector<double>* isFastD;
+
+	// Initial Setup of the expression curve
+	if (option == "left_hand") {
+		track_index = bass_exp_track;
+		expression_list = &exp_bass;
+		isMF = &isMF_bass;
+		isSlowC = &isSlowC_bass;
+		isFastC = &isFastC_bass;
+		isFastD = &isFastD_bass;
+	} else {
+		track_index = treble_exp_track;
+		expression_list = &exp_treble;
+		isMF = &isMF_treble;
+		isSlowC = &isSlowC_treble;
+		isFastC = &isFastC_treble;
+		isFastD = &isFastD_treble;
+	}
+
+	// exp_notes = notes for the expessions being processed.
+	MidiEventList& exp_notes = midi_data[track_index];
+
+	// length of the MIDI file in milliseconds (plus an extra millisecond
+	// to avoid problems):
+	int exp_length = midi_data.getFileDurationInSeconds() * 1000 + 1;
+	expression_list->resize(exp_length);
+
+	// set all of the times to piano by default:
+	std::fill(expression_list->begin(), expression_list->end(), welte_p);
+
+	// vector<bool> isMF(exp_length, false);    // setting up the upper/lower bound
+
+	isMF->resize(exp_length);
+	isSlowC->resize(exp_length);
+	isFastC->resize(exp_length);
+	isFastD->resize(exp_length);
+	std::fill(isMF->begin(), isMF->end(), false);        // is MF hook on?
+	std::fill(isSlowC->begin(), isSlowC->end(), false);  // is slow crescendo on?
+	std::fill(isFastC->begin(), isFastC->end(), false);  // is fast crescendo on?
+	std::fill(isFastD->begin(), isFastD->end(), false);  // is fast decrescendo on?
+
+	// Lock and Cancel
+	bool valve_mf_on    = false;
+	bool valve_slowc_on = false;
+
+	int valve_mf_starttime    = 0;        // 0 for off
+	int valve_slowc_starttime = 0;
+
+	// First pass: For each time section calculate the current boolean
+	// state of each expression.
+
+	for (int i=0; i<exp_notes.getEventCount(); i++) {
+		MidiEvent* me = &exp_notes[i];
+		if (!me->isNoteOn()) {
+			continue;
+		}
+		int exp_no = me->getKeyNumber();  // expression number
+		int st = int(me->seconds * 1000.0 + 0.5);  // start time in milliseconds
+		int et = int((me->seconds + me->getDurationInSeconds()) * 1000.0 + 0.5);
+
+		//printf("i: %d\t", i);
+		//printf("exp_no: %d\n", exp_no);
+		if ((exp_no == 14) || (exp_no == 113)) {
+			// MF off
+			if (valve_mf_on) {
+				for (int j=valve_mf_starttime; j<st; j++) {
+					// record MF Valve information for previous
+					isMF->at(j) = true;
+					//cout << "MF is on" << '\t' << j << endl;
+				}
+			}
+			valve_mf_on = false;
+
+		} else if ((exp_no == 15) || (exp_no == 112)) {
+			// MF on, just update the start Time
+			if (!valve_mf_on) {    // if previous has an on, ignore
+				valve_mf_on = true;
+				valve_mf_starttime = st;
+				//printf("detect MF on, recording valve_mf_starttime = %d\n", valve_mf_starttime);
+			}
+		}
+		// detect slow crescendo on, update starttime
+		  else if ((exp_no == 17) || (exp_no == 110)) { // Crescendo on (slow)
+			if (!valve_slowc_on) { // if previous has an on, ignore
+				valve_slowc_on = true;
+				valve_slowc_starttime = st;
+				//printf("detect slowC on, recording valve_slowc_starttime = %d\n", valve_slowc_starttime);
+			}
+		}
+		// detect slow decrescendo off, update isSlowC
+		  else if ((exp_no == 16) || (exp_no == 111)) {
+			if (valve_slowc_on) {
+				for (int j=valve_slowc_starttime; j<st; j++) {
+					// record Cresc Valve information for previous
+					isSlowC->at(j) = true;
+				}
+				//printf("update isSlowC from %d\t", valve_slowc_starttime);
+				//printf("to %d\n", st-1);
+			}
+			valve_slowc_on = false;
+		}
+		// Fast Crescendo/Decrescendo is a direct operation (length of perforation matters)
+		  else if ((exp_no == 18) || (exp_no == 109)) { // Forzando off -- Fast Decrescendo
+				for (int j=st; j<et; j++) {
+					isFastD->at(j) = true;
+				}
+
+		} else if ((exp_no == 19) || (exp_no == 108)) { // Forzando on -- Fast Crescendo
+				for (int j=st; j<et; j++) {
+					isFastC->at(j) = true;
+				}
+		}
+	}
+
+	// TODO: deal with the last case (if crescendo OFF is missing)
+
+	// Second pass, update the current velocity according to the previous one
+
+	double amount = 0.0;
+	double eps = 0.0001;
+	//bool lowerMF = false; // If it's an MF to prevent it from traveling further
+	// printf("min: %f\t", welte_p);
+	// printf("max: %f\t", welte_f);
+	// printf("mf: %f\t", welte_mf);
+	// printf("slow_cresc_rate: %f\t", slow_decay_rate);
+	// printf("fast crescendo rate: %f\t", fastC_decay_rate);
+	// printf("fast-decrescendo: %f\n", fastD_decay_rate);
+
+	// printf("calculation: %f\n", (welte_mf - welte_p) / slow_decay_rate);
+	// printf("slowstep: %f\t", slow_step);
+	// printf("fastCstep: %f\t", fastC_step);
+	// printf("fastDstep: %f\n", fastD_step);
+	for (int i=1; i<exp_length; i++) {
+		if ((isSlowC->at(i) == false) && (isFastC->at(i) == false) && (isFastD->at(i) == false)) {
+			amount = -slow_step; // slow decrescendo is always on
+
+		// if both slow crescendo and fast crescendo
+		//elif isSlowC->at(i) == 1 and isFastC->at(i) == 1:
+		//    amount = self.slow_step + self.fastC_step
+
+		} else {
+			amount = isSlowC->at(i) * slow_step + isFastC->at(i) * fastC_step + isFastD->at(i) * fastD_step;
+		}
+		// printf("i: %d\t", i);
+		// printf("amount: %f\t", amount);
+		// printf("isSlowC: %f\t", isSlowC->at(i));
+		// printf("isFastC: %f\t", isFastC->at(i));
+		// printf("isFastD: %f\t", isFastD->at(i));
+		//cout << isSlowC->at(i) << isSlowD->at(i) << isFastD->at(i) << endl;
+		//cout << ("isSlowC: " + std::to_string(isSlowC) + '\t' + "isFastC: " + std::to_string(isFastC) + '\t' + "isFastD: " + std::to_string(isFastD))  << endl;
+
+		double newV = expression_list->at(i-1) + amount;
+		//cout << ("newV: " + std::to_string(newV)) << endl;
+		//printf("newV: %f\t", newV);
+		expression_list->at(i) = newV;
+
+		if (isMF->at(i) == true) {
+			if (expression_list->at(i-1) > welte_mf){
+				if (amount < 0) {
+					expression_list->at(i) = std::max(welte_mf + eps, expression_list->at(i));
+				}
+				//cout << "taking max" << endl;
+				else{
+					expression_list->at(i) = std::min(welte_f, expression_list->at(i));
+				}
+			}
+			else if (expression_list->at(i-1) < welte_mf){
+				if (amount > 0){
+					expression_list->at(i) = std::min(welte_mf - eps, expression_list->at(i));
+				}
+				else{
+					expression_list->at(i) = std::max(welte_p, expression_list->at(i));
+				}
+				//cout << " taking min " << endl;
+			}
+			else{
+				//cout << "equals 60 here" << endl;
+			}
+			// if ((expression_list->at(i-1) > welte_mf) && (amount > 0)) {
+			// 	// do nothing
+			// } else if ((expression_list->at(i-1) >= welte_mf) && (amount < 0)) {
+			// 	expression_list->at(i) = std::max(welte_mf, expression_list->at(i));
+			// } else if ((expression_list->at(i-1) < welte_mf) && (amount < 0)) {
+			// 	// do nothing
+			// } else if ((expression_list->at(i-1) <= welte_mf) && (amount > 0)) {
+			// 	expression_list->at(i) = std::min(welte_mf, expression_list->at(i));
+			// }
+		} else {
+			// slow crescendo will only reach welte_loud
+			if (isSlowC->at(i) && (isFastC->at(i) == false) && expression_list->at(i-1) < welte_loud) {
+				expression_list->at(i) = min(expression_list->at(i), welte_loud - eps);
+			}
+		}
+		// regulating max and min
+		expression_list->at(i) = max(welte_p, expression_list->at(i));
+		expression_list->at(i) = min(welte_f, expression_list->at(i));
+		//cout << ("newV after process: " + std::to_string(expression_list->at(i))) << endl;
+		//printf("newV after process: %f\n", expression_list->at(i));
+	}
 }
 
 

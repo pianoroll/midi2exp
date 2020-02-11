@@ -637,54 +637,28 @@ void Expressionizer::calculateWelteGreenExpression(std::string option) {
 		int st = int(me->seconds * 1000.0 + 0.5);  // start time in milliseconds
 		int et = int((me->seconds + me->getDurationInSeconds()) * 1000.0 + 0.5);
 
-		//printf("i: %d\t", i);
-		//printf("exp_no: %d\n", exp_no);
-		if ((exp_no == 14) || (exp_no == 113)) {
-			// MF off
-			if (valve_mf_on) {
-				for (int j=valve_mf_starttime; j<st; j++) {
-					// record MF Valve information for previous
+		// MF Hook
+		if ((exp_no == 17) || (exp_no == 112)) { // Forzando off -- Fast Decrescendo
+				for (int j=st; j<et; j++) {
 					isMF->at(j) = true;
-					//cout << "MF is on" << '\t' << j << endl;
 				}
-			}
-			valve_mf_on = false;
 
-		} else if ((exp_no == 15) || (exp_no == 112)) {
-			// MF on, just update the start Time
-			if (!valve_mf_on) {    // if previous has an on, ignore
-				valve_mf_on = true;
-				valve_mf_starttime = st;
-				//printf("detect MF on, recording valve_mf_starttime = %d\n", valve_mf_starttime);
-			}
 		}
-		// detect slow crescendo on, update starttime
-		  else if ((exp_no == 17) || (exp_no == 110)) { // Crescendo on (slow)
-			if (!valve_slowc_on) { // if previous has an on, ignore
-				valve_slowc_on = true;
-				valve_slowc_starttime = st;
-				//printf("detect slowC on, recording valve_slowc_starttime = %d\n", valve_slowc_starttime);
-			}
-		}
-		// detect slow decrescendo off, update isSlowC
-		  else if ((exp_no == 16) || (exp_no == 111)) {
-			if (valve_slowc_on) {
-				for (int j=valve_slowc_starttime; j<st; j++) {
-					// record Cresc Valve information for previous
+
+		// slow crescendo
+		else if ((exp_no == 19) || (exp_no == 110)) { // Forzando off -- Fast Decrescendo
+				for (int j=st; j<et; j++) {
 					isSlowC->at(j) = true;
 				}
-				//printf("update isSlowC from %d\t", valve_slowc_starttime);
-				//printf("to %d\n", st-1);
-			}
-			valve_slowc_on = false;
+
 		}
 		// Fast Crescendo/Decrescendo is a direct operation (length of perforation matters)
-		  else if ((exp_no == 18) || (exp_no == 109)) { // Forzando off -- Fast Decrescendo
+		  else if ((exp_no == 16) || (exp_no == 113)) { // Forzando off -- Fast Decrescendo
 				for (int j=st; j<et; j++) {
 					isFastD->at(j) = true;
 				}
 
-		} else if ((exp_no == 19) || (exp_no == 108)) { // Forzando on -- Fast Crescendo
+		} else if ((exp_no == 20) || (exp_no == 109)) { // Forzando on -- Fast Crescendo
 				for (int j=st; j<et; j++) {
 					isFastC->at(j) = true;
 				}

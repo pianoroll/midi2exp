@@ -331,7 +331,7 @@ void MidiRoll::removeAcceleration (void) {
 //    to the input paramters.
 // default values:
 //      inches  = 12.0;
-//      percent = 0.04;  ---> 0.22
+//      percent = 0.22
 //
 
 void MidiRoll::applyAcceleration(double inches, double percent) {

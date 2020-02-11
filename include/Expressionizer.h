@@ -71,6 +71,7 @@ class Expressionizer {
 		void          setSlowDecayRate             (double value);
 		void          setFastCrescendo             (double value);
 		void          setFastDecrescendo           (double value);
+		void          setVersion                   (std::string version);
 
 		double        getWelteP                    (void);
 		double        getWelteMF                   (void);
@@ -80,6 +81,8 @@ class Expressionizer {
 		double        getFastCrescendo             (void);
 		double        getFastDecrescendo           (void);
 		double        getLeftRightDiff             (void);
+
+		void          setAcceleration              (double inches, double percent);
 
 
 	protected:
@@ -104,6 +107,11 @@ class Expressionizer {
 
 		bool trackbar_correction_done = false;
 		bool delete_expresison_tracks = false;
+
+		// version
+		std::string m_version;
+		double      m_inches  = 12.0;
+		double      m_percent = 0.22;
 
 		// left_adjust: reduce loudness of bass register (for attack velocities)
 		int left_adjust       = -5;
@@ -162,11 +170,16 @@ class Expressionizer {
 		//double slow_decay_rate  = 2380.0 * 2.0;
 		//double fastC_decay_rate = 170.0;
 		//double fastD_decay_rate = 150.0 * 2.2;
+		// Green Welte v1:
+		double slow_decay_rate  = 2364;
+		double fastC_decay_rate = 566;
+		double fastD_decay_rate = 280; // more than 245, or just 189ms
+
 		// experiment 0411
-		// v1:
-		double slow_decay_rate  = 2380;  //2380
-		double fastC_decay_rate = 300; // test roll shows around 170ms-200ms from min to MF hook
-		double fastD_decay_rate = 400; // test roll shows 166ms -- 300ms at max 400ms fast decrescendo can bring Max down to Min
+		// Red Welte v1:
+		// double slow_decay_rate  = 2380;  //2380
+		// double fastC_decay_rate = 300; // test roll shows around 170ms-200ms from min to MF hook
+		// double fastD_decay_rate = 400; // test roll shows 166ms -- 300ms at max 400ms fast decrescendo can bring Max down to Min
 		// before 0411
 		// double slow_decay_rate  = 2380.0 * 4.0;
 		// double fastC_decay_rate = 700.0; //1050.0;

@@ -61,6 +61,7 @@ void Expressionizer::setupRedWelte(void) {
 
 
 
+
 //////////////////////////////
 //
 // Expressionizer::Expressionizer -- Deconstructor.
@@ -68,6 +69,24 @@ void Expressionizer::setupRedWelte(void) {
 
 Expressionizer::~Expressionizer(void) {
 	// do nothing
+}
+
+
+//////////////////////////////
+//
+// Expressionizer::setAcceleration -- Set acceleration by xx percent every xx inches.
+//
+
+void Expressionizer::setAcceleration(double inches, double percent) {
+	if (inches <= 0.0) {
+		return;
+	}
+	if (percent <= 0.0) {
+		return;
+	}
+
+	m_inches = inches;
+	m_percent = percent;
 }
 
 
@@ -79,7 +98,7 @@ Expressionizer::~Expressionizer(void) {
 
 void Expressionizer::addExpression(void) {
 	setPan();
-	midi_data.applyAcceleration(12, 0.22);
+	midi_data.applyAcceleration(m_inches, m_percent);
 
 	calculateRedWelteExpression("left_hand");
 	calculateRedWelteExpression("right_hand");
@@ -338,6 +357,7 @@ bool Expressionizer::writeMidiFile(std::string filename) {
 //
 
 void Expressionizer::addMetadata(void) {
+
 	midi_data.setMetadata("EXP_SOFTWARE", "\t\thttps://github.com/pianoroll/midi2exp");
 
 	stringstream ss;
@@ -354,6 +374,20 @@ void Expressionizer::addMetadata(void) {
 	sss = ss.str();
 	sss.erase(remove(sss.begin(), sss.end(), '\n'), sss.end());
 	midi_data.addText(0, 0, sss);
+
+	if (!m_version.empty()) {
+		midi_data.setMetadata("VERSION", m_version);
+	}
+
+	ss.str("");
+	ss << "\t\t" << m_inches;
+	sss = ss.str();
+	midi_data.setMetadata("ACCEL_INCH", sss);
+
+	ss.str("");
+	ss << "\t" << m_percent;
+	sss = ss.str();
+	midi_data.setMetadata("ACCEL_PERCENT", sss);
 
 	if (trackbar_correction_done) {
 		int correction = int(getTrackerbarDiameter() * getPunchExtensionFraction() + 0.5);
@@ -452,7 +486,15 @@ void Expressionizer::applyExpression(std::string option) {
 
 }
 
+//////////////////////////////
+//
+// Expressionizer::setVersion -- Set version of expression
+//
+//
 
+void Expressionizer::setVersion(std::string version) {
+	m_version = version;
+}
 
 //////////////////////////////
 //

@@ -40,6 +40,9 @@ int main(int argc, char** argv) {
 	options.define("wmf|welte-mezzo-forte=d:60.0", "(Red Welte)");
 	options.define("wf|welte-forte=d:89.0", "(Red Welte)");
 	options.define("wl|welte-loud=d:70.0", "(Red Welte)");
+	options.define("v|version=s", "Add version number metadata");
+	options.define("i|ai|acceleration-inches=d:12.0", "acceleration update for every xx inches");
+	options.define("p|ap|acceleration-percent=d:0.22", "acceleration percent (based on every x inches)");
 
 	options.process(argc, argv);
 
@@ -61,9 +64,7 @@ int main(int argc, char** argv) {
 	}
 
 	if (options.getBoolean("red-welte")) {
-		//creator.setRollTempo(104.331);    // old tempo: 98.4252
-		//creator.setRollTempo(98.4252);
-		creator.setRollTempo(95);
+		creator.setRollTempo(95);           //94.6
 	} else if (options.getBoolean("tempo")) {
 		creator.setRollTempo(options.getDouble("tempo"));
 	}
@@ -98,6 +99,14 @@ int main(int argc, char** argv) {
 	if (options.getBoolean("adjust-hole-lengths")) {
 		creator.applyTrackBarWidthCorrection();
 	}
+
+	if (options.getBoolean("version")) {
+		creator.setVersion(options.getString("version"));
+	}
+
+	double inches = options.getDouble("acceleration-inches");
+	double percent = options.getDouble("acceleration-percent");
+	creator.setAcceleration(inches, percent);
 
 	creator.addExpression();
 	creator.setPianoTimbre();

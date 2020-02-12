@@ -326,7 +326,7 @@ void Expressionizer::addSoftPedalling(int sourcetrack, int targetkey) {
 	MidiEventList& events = midifile[sourcetrack];
 	int count = events.getEventCount();
 	for (int i=0; i<count; i++) {
-		if (!events[i].isNoteOn()) {
+		if (!events[i].isNote()) {
 			continue;
 		}
 		int key = events[i].getKeyNumber();

@@ -30,7 +30,7 @@ using namespace smf;
 //
 
 Expressionizer::Expressionizer(void) {
-	setupGreenWelte();  // default setup is for Green Welte rolls.
+	setupRedWelte();  // default setup is for Red Welte rolls.
 }
 
 
@@ -660,7 +660,7 @@ double Expressionizer::getPreviousNonzero(vector<double>& myArray,
 
 //////////////////////////////
 //
-// Expressionizer::calculateRedWelteExpression --
+// Expressionizer::calculateGreenWelteExpression --
 //
 //		As of 2018-04-06, some modification (F: fast crescendo -- length
 //    of perforation) (F+slow crescendo: fastest crescendo)
@@ -669,31 +669,19 @@ double Expressionizer::getPreviousNonzero(vector<double>& myArray,
 //		left_hand: 12 less than right hand
 //
 //		According to the following expression code of Red Welte
-//		Midi track 3 (zero offset):
-//		   14: (1)Bass MF off
-//		   15: (2)Bass MF on
-//		   16: (3)Bass Crescendo off (Slow Crescendo)
-//		   17: (4)Bass Crescendo on
-//		   18: (5)Bass Forzando off  (Fast Crescendo)
-//		   19: (6)Bass Forzando on
-//		   20: (7)Soft-pedal off
-//		   21: (8)Soft-pedal on
-//		   22: Motor off
-//		   23: Motor on
+//		Midi track 3 (On MIDI channel 1):
+//		   16: (1) Bass Sforzando piano (& rewind)
+//		   17: (2) Bass Mezzoforte
+//		   18: (3) Sustain pedal
+//		   19: (4) Bass Crescendo
+//		   20: (5) Bass Sforzando forte
 //
-//		Midi track 4 (zero offset):
-//		   104: Rewind
-//		   105: Electric cutoff
-//		   106: (8)Sustain pedal on
-//		   107: (7)Sustain pedal off
-//		   108: (6)Treble Forzando on   (Fast Crescendo)
-//		   109: (5)Treble Forzando off
-//		   110: (4)Treble Crescendo on  (Slow Crescendo)
-//		   111: (3)Treble Crescendo off
-//		   112: (2)Treble MF on
-//		   113: (1)Treble MF off
-//
-//    pianoside = "left_hand" or "right_hand";
+//		Midi track 4 (On MIDI channel 4 offset):
+//		   109: (94) Treble Sforzando forte
+//		   110: (95) Treble Crescendo
+//		   111: (96) Soft pedal
+//		   112: (97) Treble Mezzoforte
+//		   113: (98) Treble Sforzando piano
 //
 
 void Expressionizer::calculateWelteGreenExpression(std::string option) {
@@ -913,8 +901,6 @@ void Expressionizer::calculateWelteGreenExpression(std::string option) {
 //		   111: (3)Treble Crescendo off
 //		   112: (2)Treble MF on
 //		   113: (1)Treble MF off
-//
-//    pianoside = "left_hand" or "right_hand";
 //
 
 void Expressionizer::calculateRedWelteExpression(std::string option) {

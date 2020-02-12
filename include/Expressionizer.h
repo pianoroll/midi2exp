@@ -39,8 +39,7 @@ class Expressionizer {
 		bool          writeMidiFile                (std::string filename);
 
 		std::ostream& printExpression              (std::ostream& out, bool extended = false);
-		void 		  printVelocity();
-
+		void 		     printVelocity();
 
 		void          addExpression                (void);
 		void          setPan                       (void);
@@ -59,12 +58,13 @@ class Expressionizer {
 		void          removeExpressionTracksOnWrite(void);
 		bool          setPianoTimbre               (void);
 
-		// void          addSustainPedalling          (int sourcetrack, int onkey, int offkey);
-		// void          addSoftPedalling             (int sourcetrack, int onkey, int offkey);
+		void          addSustainPedallingLockAndCancel (int sourcetrack, int onkey, int offkey);
+		void          addSoftPedallingLockAndCancel    (int sourcetrack, int onkey, int offkey);
 		void          addSustainPedalling          (int sourcetrack, int onkey);
 		void          addSoftPedalling             (int sourcetrack, int onkey);
 
 		void          setupRedWelte                (void);
+		void          setupGreenWelte              (void);
 
 		void          setWelteP                    (double value);
 		void          setWelteMF                   (double value);
@@ -94,7 +94,9 @@ class Expressionizer {
 		void          calculateWelteGreenExpression(std::string option);
 		void          applyExpression              (std::string option);
 		double        getPreviousNonzero           (std::vector<double>& myArray, int start_index);
+
 	private:
+		std::string roll_type = "green";
 
 		double welte_p        = 38.0;  // 38.0
 		double welte_mf       = 60.0;

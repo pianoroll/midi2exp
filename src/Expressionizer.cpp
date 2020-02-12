@@ -30,7 +30,7 @@ using namespace smf;
 //
 
 Expressionizer::Expressionizer(void) {
-	setupRedWelte();  // default setup is for Red Welte rolls.
+	setupGreenWelte();  // default setup is for Green Welte rolls.
 }
 
 
@@ -53,19 +53,38 @@ void Expressionizer::setupRedWelte(void) {
 	// cerr << "FASTD STEP " << fastD_step << endl;
 
 	// expression keys for Red Welte rolls:
-	// PedalOnKey     = 106;
-	// PedalOffKey    = 107;
-	// SoftOnKey      = 21;
-	// SoftOffKey     = 20;
+	PedalOnKey     = 106;
+	PedalOffKey    = 107;
+	SoftOnKey      = 21;
+	SoftOffKey     = 20;
+	roll_type      = "red";
+}
 
-	// expression keys for Green Welte rolls:
-	// if Welte_Green
+
+
+//////////////////////////////
+//
+// Expressionizer::setupGreenWelte -- Prepare constants for Green Welte rolls.
+//
+
+void Expressionizer::setupGreenWelte(void) {
+	// slow_step   =  cresc_rate * welte_mf / slow_decay_rate;
+	// fastC_step  =  cresc_rate * (welte_f - welte_p) / fastC_decay_rate;
+	// fastD_step  = -cresc_rate * (welte_f - welte_p) / fastD_decay_rate;
+	slow_step   =   (welte_mf - welte_p) / slow_decay_rate;
+	fastC_step  =   (welte_mf - welte_p) / fastC_decay_rate;
+	fastD_step  = - (welte_f - welte_p)  / fastD_decay_rate;
+	// cerr << "CRESC_RATE " << cresc_rate << endl;
+	// cerr << "SLOW STEP " << slow_step << endl;
+	// cerr << "FASTC STEP " << fastC_step << endl;
+	// cerr << "FASTD STEP " << fastD_step << endl;
+
+	// Expression keys for Green Welte rolls:
 	PedalOnKey     = 18;
 	SoftOnKey      = 111;
-	//PedalOffKey    = 107;
-	//SoftOnKey      = 21;
-	//SoftOffKey     = 20;
-
+	PedalOffKey    = -18;
+	SoftOnKey      = -111;
+	roll_type      = "green";
 }
 
 
@@ -109,30 +128,40 @@ void Expressionizer::addExpression(void) {
 	setPan();
 	midi_data.applyAcceleration(m_inches, m_percent);
 
-	// calculateRedWelteExpression("left_hand");
-	// calculateRedWelteExpression("right_hand");
-	calculateWelteGreenExpression("left_hand");
-	calculateWelteGreenExpression("right_hand");
+	if (roll_type == "red") {
+		calculateRedWelteExpression("left_hand");
+		calculateRedWelteExpression("right_hand");
+	} else if (roll_type == "green") {
+		calculateWelteGreenExpression("left_hand");
+		calculateWelteGreenExpression("right_hand");
+	} else {
+		cerr << "Don't know roll type: " << roll_type << endl;
+		exit(1);
+	}
 
 	applyExpression("left_hand");
 	applyExpression("right_hand");
 
-	// addSustainPedalling(treble_exp_track, PedalOnKey, PedalOffKey);
-	// addSoftPedalling(bass_exp_track, SoftOnKey, SoftOffKey);
-	addSustainPedalling(treble_exp_track, PedalOnKey);
-	addSoftPedalling(bass_exp_track, SoftOnKey);
+	if (roll_type == "red") {
+		// red roll pedalling
+		addSustainPedallingLockAndCancel(treble_exp_track, PedalOnKey, PedalOffKey);
+		addSoftPedallingLockAndCancel(bass_exp_track, SoftOnKey, SoftOffKey);
+	} else {
+		addSustainPedalling(bass_exp_track, PedalOnKey);
+		addSoftPedalling(treble_exp_track, SoftOnKey);
+	}
 }
 
 
 
 //////////////////////////////
 //
-// Expressionizer::addSustainPedalling -- Extract sustain pedal information
-//    from the expression track and insert sustain pedalling into the
-//    bass and treble note channels/tracks.
+// Expressionizer::addSustainPedallingLockAndCancel -- Extract sustain pedal
+//    information from the expression track and insert sustain pedalling into
+//    the bass and treble note channels/tracks.
 //
 
-void Expressionizer::addSustainPedalling(int sourcetrack, int onkey) {
+void Expressionizer::addSustainPedallingLockAndCancel(int sourcetrack, int onkey, int offkey) {
 	MidiRoll& midifile = midi_data;
 	const int pedal_controller = 64;  // sustain pedal
 
@@ -161,8 +190,61 @@ void Expressionizer::addSustainPedalling(int sourcetrack, int onkey) {
 		int key = events[i].getKeyNumber();
 		tick = events[i].tick;
 		if (key == onkey) {
-			midifile.addController(bass_track,   tick, bass_ch,   pedal_controller, 127);
-			midifile.addController(treble_track, tick, treble_ch, pedal_controller, 127);
+			midifile.addController(bass_track,   tick+1, bass_ch,   pedal_controller, 127);
+			midifile.addController(treble_track, tick+1, treble_ch, pedal_controller, 127);
+		} else if (key == offkey) {
+			midifile.addController(bass_track,   tick, bass_ch,   pedal_controller, 0);
+			midifile.addController(treble_track, tick, treble_ch, pedal_controller, 0);
+		}
+	}
+	midifile.sortTracks();
+}
+
+
+
+//////////////////////////////
+//
+// Expressionizer::addSustainPedalling -- Extract sustain pedal information
+//    from the expression track and insert sustain pedalling into the
+//    bass and treble note channels/tracks.
+//
+
+void Expressionizer::addSustainPedalling(int sourcetrack, int targetkey) {
+	MidiRoll& midifile = midi_data;
+	const int pedal_controller = 64;  // sustain pedal
+
+	bool hascontroller = hasControllerInTrack(bass_track, pedal_controller);
+	if (hascontroller) {
+		cerr << "Warning: Bass track already contains sustain pedalling." << endl;
+		return;
+	}
+
+	hascontroller = hasControllerInTrack(treble_track, pedal_controller);
+	if (hascontroller) {
+		cerr << "Warning: Treble track already contains sustain pedalling." << endl;
+		return;
+	}
+
+	// Search through the track for notes that represent pedal on or pedal off.
+	// The sustain pedal needs to be duplicated to be added to both the bass
+	// track/channel and the treble track/channel.
+	int tick;
+	MidiEventList& events = midifile[sourcetrack];
+	int count = events.getEventCount();
+	for (int i=0; i<count; i++) {
+		if (!events[i].isNoteOn()) {
+			continue;
+		}
+		int key = events[i].getKeyNumber();
+		tick = events[i].tick;
+		if (key == targetkey) {
+			if (events[i].isNoteOn()) {
+				midifile.addController(bass_track,   tick, bass_ch,   pedal_controller, 127);
+				midifile.addController(treble_track, tick, treble_ch, pedal_controller, 127);
+			} else {
+				midifile.addController(bass_track,   tick, bass_ch,   pedal_controller, 0);
+				midifile.addController(treble_track, tick, treble_ch, pedal_controller, 0);
+			}
 		}
 		//midifile.addController(bass_track,   tick+1, bass_ch,   pedal_controller, 0);
 		//midifile.addController(treble_track, tick+1, treble_ch, pedal_controller, 0);
@@ -178,11 +260,10 @@ void Expressionizer::addSustainPedalling(int sourcetrack, int onkey) {
 
 //////////////////////////////
 //
-// Expressionizer::addSoftPedalling --
+// Expressionizer::addSoftPedallingLockAndCancel --
 //
 
-// void Expressionizer::addSoftPedalling(int sourcetrack, int onkey, int offkey) {
-void Expressionizer::addSoftPedalling(int sourcetrack, int onkey) {
+void Expressionizer::addSoftPedallingLockAndCancel(int sourcetrack, int onkey, int offkey) {
 	MidiRoll& midifile = midi_data;
 	const int pedal_controller = 67;  // soft pedal
 
@@ -218,6 +299,50 @@ void Expressionizer::addSoftPedalling(int sourcetrack, int onkey) {
 	midifile.sortTracks();
 }
 
+
+
+//////////////////////////////
+//
+// Expressionizer::addSoftPedalling --
+//
+
+void Expressionizer::addSoftPedalling(int sourcetrack, int targetkey) {
+	MidiRoll& midifile = midi_data;
+	const int pedal_controller = 67;  // soft pedal
+
+	bool hascontroller = hasControllerInTrack(bass_track, pedal_controller);
+	if (hascontroller) {
+		cerr << "Warning: Bass track already contains soft pedalling." << endl;
+		return;
+	}
+
+	hascontroller = hasControllerInTrack(treble_track, pedal_controller);
+	if (hascontroller) {
+		cerr << "Warning: Treble track already contains soft pedalling." << endl;
+		return;
+	}
+
+	int tick;
+	MidiEventList& events = midifile[sourcetrack];
+	int count = events.getEventCount();
+	for (int i=0; i<count; i++) {
+		if (!events[i].isNoteOn()) {
+			continue;
+		}
+		int key = events[i].getKeyNumber();
+		tick = events[i].tick;
+		if (key == targetkey) {
+			if (events[i].isNoteOn()) {
+				midifile.addController(bass_track,   tick, bass_ch,   pedal_controller, 127);
+				midifile.addController(treble_track, tick, treble_ch, pedal_controller, 127);
+			} else {
+				midifile.addController(bass_track,   tick, bass_ch,   pedal_controller, 0);
+				midifile.addController(treble_track, tick, treble_ch, pedal_controller, 0);
+			}
+		}
+	}
+	midifile.sortTracks();
+}
 
 
 //////////////////////////////

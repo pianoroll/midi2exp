@@ -31,7 +31,8 @@ int main(int argc, char** argv) {
 	options.define("r|remove-expression-tracks=b", "remove expression tracks");
 	options.define("t|tempo=d:100", "tempo adjustment for pianoroll file");
 	options.define("x|display-extended-expression-info=b", "display booleans needed to create expression");
-	options.define("w|red-welte=b:", "set tempo for red welte rolls");
+	options.define("w|red|red-welte=b:", "set tempo for red welte rolls (95)");
+	options.define("g|green|green-welte=b:", "process a green welte roll");
 
 	options.define("sd|slow-decay-rate=d:2380", "Slow decay rate (Red Welte)"); // 2380
 	options.define("fc|fast-crescendo=d:300", "Fast crescendo (Red Welte)");    //180 --> 300
@@ -47,6 +48,10 @@ int main(int argc, char** argv) {
 	options.process(argc, argv);
 
 	Expressionizer creator;
+	creator.setupRedWelte();
+	if (options.getBoolean("green")) {
+		creator.setupGreenWelte();
+	}
 
 	creator.setPunchDiameter(options.getDouble("punch-diameter"));
 	creator.setTrackerbarDiameter(options.getDouble("trackerbar-diameter"));
@@ -63,8 +68,9 @@ int main(int argc, char** argv) {
 		creator.readMidiFile(options.getArg(1));
 	}
 
+	// green welte default tempo is 72.2222 if not specified.
 	if (options.getBoolean("red-welte")) {
-		creator.setRollTempo(95);           //94.6
+		creator.setRollTempo(95);    //94.6
 	} else if (options.getBoolean("tempo")) {
 		creator.setRollTempo(options.getDouble("tempo"));
 	}

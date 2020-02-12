@@ -58,6 +58,9 @@ void Expressionizer::setupRedWelte(void) {
 	SoftOnKey      = 21;
 	SoftOffKey     = 20;
 	roll_type      = "red";
+	slow_decay_rate  = 2380;  //2380
+	fastC_decay_rate = 300; // test roll shows around 170ms-200ms from min to MF hook
+	fastD_decay_rate = 400; // test roll shows 166ms -- 300ms at max 400ms fast decrescendo can b
 }
 
 
@@ -85,6 +88,10 @@ void Expressionizer::setupGreenWelte(void) {
 	PedalOffKey    = -18;
 	SoftOnKey      = -111;
 	roll_type      = "green";
+	slow_decay_rate  = 2364;
+	fastC_decay_rate = 566; //
+	fastD_decay_rate = 320; // more than 245, more than 280 or just 189ms
+
 }
 
 

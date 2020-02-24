@@ -2,7 +2,7 @@
 // Programmer:    Kitty Shi
 // Programmer:    Craig Stuart Sapp (translation to C++)
 // Creation Date: Thu Oct  4 16:32:27 PDT 2018
-// Last Modified: Sat Mar 23 00:11:42 EDT 2019
+// Last Modified: Mon Feb 24 15:36:22 PST 2020
 // Filename:      midi2exp/include/Expressionizer.h
 // Website:       https://github.com/pianoroll/midi2exp
 // Syntax:        C++11
@@ -64,6 +64,7 @@ class Expressionizer {
 		void          addSoftPedalling             (int sourcetrack, int onkey);
 
 		void          setupRedWelte                (void);
+		void          setupLicenseeWelte           (void);
 		void          setupGreenWelte              (void);
 
 		void          setWelteP                    (double value);
@@ -88,15 +89,16 @@ class Expressionizer {
 
 
 	protected:
-		void          addMetadata                  (void);
-		bool          hasControllerInTrack         (int track, int controller);
-		void          calculateRedWelteExpression  (std::string option);
-		void          calculateWelteGreenExpression(std::string option);
-		void          applyExpression              (std::string option);
-		double        getPreviousNonzero           (std::vector<double>& myArray, int start_index);
+		void          addMetadata                     (void);
+		bool          hasControllerInTrack            (int track, int controller);
+		void          calculateRedWelteExpression     (const std::string& option);
+		void          calculateLicenseeWelteExpression(const std::string& option);
+		void          calculateGreenWelteExpression   (const std::string& option);
+		void          applyExpression                 (const std::string& option);
+		double        getPreviousNonzero              (std::vector<double>& myArray, int start_index);
 
 	private:
-		std::string roll_type = "green";
+		std::string roll_type = "red";
 
 		double welte_p        = 38.0;  // 38.0
 		double welte_mf       = 60.0;
@@ -175,6 +177,7 @@ class Expressionizer {
 		//double slow_decay_rate  = 2380.0 * 2.0;
 		//double fastC_decay_rate = 170.0;
 		//double fastD_decay_rate = 150.0 * 2.2;
+
 		// Green Welte v1:
 		// double slow_decay_rate  = 2364;
 		// double fastC_decay_rate = 566; //
@@ -182,9 +185,10 @@ class Expressionizer {
 
 		// experiment 0411
 		// Red Welte v1:
-		double slow_decay_rate  = 2380;  //2380
-		double fastC_decay_rate = 300; // test roll shows around 170ms-200ms from min to MF hook
-		double fastD_decay_rate = 400; // test roll shows 166ms -- 300ms at max 400ms fast decrescendo can bring Max down to Min
+		double slow_decay_rate  = 2380; //2380
+		double fastC_decay_rate = 300;  // test roll shows around 170ms-200ms from min to MF hook
+		double fastD_decay_rate = 400;  // test roll shows 166ms -- 300ms at max 400ms fast decrescendo can bring Max down to Min
+
 		// before 0411
 		// double slow_decay_rate  = 2380.0 * 4.0;
 		// double fastC_decay_rate = 700.0; //1050.0;

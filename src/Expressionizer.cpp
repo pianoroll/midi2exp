@@ -90,7 +90,7 @@ void Expressionizer::setupGreenWelte(void) {
 	roll_type      = "green";
 	slow_decay_rate  = 2364;
 	fastC_decay_rate = 566; //
-	fastD_decay_rate = 320; // more than 245, more than 280 or just 189ms
+	fastD_decay_rate = 300; // more than 245, more than 280 or just 189ms
 
 }
 

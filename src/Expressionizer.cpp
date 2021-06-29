@@ -2,7 +2,7 @@
 // Programmer:    Kitty Shi
 // Programmer:    Craig Stuart Sapp (translation to C++)
 // Creation Date: Thu Oct  4 16:32:27 PDT 2018
-// Last Modified: Mon Feb 24 15:36:30 PST 2020
+// Last Modified: Tue Jun 29 16:52:30 PST 2021
 // Filename:      midi2exp/src/Expressionizer.cpp
 // Website:       https://github.com/pianoroll/midi2exp
 // Syntax:        C++11
@@ -30,7 +30,8 @@ using namespace smf;
 //
 
 Expressionizer::Expressionizer(void) {
-	setupRedWelte();  // default setup is for Red Welte rolls.
+	//setupRedWelte();  // default setup is for Red Welte rolls.
+	setupGreenWelte();
 }
 
 
@@ -221,7 +222,7 @@ void Expressionizer::addExpression(void) {
 	} else if (roll_type == "licensee") {
 		addSustainPedallingLockAndCancel(treble_exp_track, PedalOnKey, PedalOffKey);
 		addSoftPedallingLockAndCancel(bass_exp_track, SoftOnKey, SoftOffKey);
-	} else {
+	} else {  // green
 		addSustainPedalling(bass_exp_track, PedalOnKey);
 		addSoftPedalling(treble_exp_track, SoftOnKey);
 	}
@@ -743,29 +744,23 @@ double Expressionizer::getPreviousNonzero(vector<double>& myArray,
 //		dynamic range default 1.2, making welte_mf: 80, Max (F): 96, and Min (P) 66
 //		left_hand: 12 less than right hand
 //
-//		According to the following expression code of Red Welte
+//		According to the following expression code of Green Welte
 //		Midi track 3 (On MIDI channel 1):
-//		   15: (1) Bass mezzoforte off
-//		   16: (2) Bass Mezzoforte on
-//		   17: (3) Bass crescendo off
-//		   18: (4) Bass crescendo on
-//		   19: (5) Bass sforzando off
-//		   20: (6) Bass sforzando on
-//		   21: (7) Hammer rail down (on?)
-//		   22: (8) Hammer rail down (off?)
+//		   16: Bass Sforzando piano
+//		   17: Bass Mezzoforte
+//		   18: Sustain Pedal
+//		   19: Bass Crescendo
+//		   20: Bass sforzando
+//		   21--66: Notes A0 to F#4
 //
 //		Midi track 4 (On MIDI channel 4 offset):
-//		   104: (89) Rewind
-//		   105: (90) Blank (shutoff on some)
-//		   106: (91) Sustaining pedal on
-//		   107: (92) Sustaining pedal off
-//		   108: (93) Treble sforzando on
-//		   109: (94) Treble sforzando off
-//		   110: (95) Treble crescendo on
-//		   111: (96) Treble crescendo off
-//		   112: (97) Treble mezzoforte on
-//		   113: (98) Treble mezzoforte off
-//
+//         67--108: Notes G4 to C8
+//         109: Treble Sforzando forte
+//		   110: Treble Crescendo
+//		   111: Soft Pedal
+//	       112: Treble Mezzoforte
+//		   113: Treble Sforzando piano
+
 
 void Expressionizer::calculateGreenWelteExpression(const std::string& option) {
 	int track_index;
@@ -833,28 +828,28 @@ void Expressionizer::calculateGreenWelteExpression(const std::string& option) {
 		int st = int(me->seconds * 1000.0 + 0.5);  // start time in milliseconds
 		int et = int((me->seconds + me->getDurationInSeconds()) * 1000.0 + 0.5);
 
-		// MF Hook
-		if ((exp_no == 17) || (exp_no == 112)) { // Forzando off -- Fast Decrescendo
+		// MF Hook is a direct operation in Welte Green (length of perforation matters)
+		if ((exp_no == 17) || (exp_no == 112)) {
 				for (int j=st; j<et; j++) {
 					isMF->at(j) = true;
 				}
 
 		}
 
-		// slow crescendo
-		else if ((exp_no == 19) || (exp_no == 110)) { // Forzando off -- Fast Decrescendo
+		// Slow crescendo is a direct operation in Welte Green
+		else if ((exp_no == 19) || (exp_no == 110)) {
 				for (int j=st; j<et; j++) {
 					isSlowC->at(j) = true;
 				}
 
 		}
 		// Fast Crescendo/Decrescendo is a direct operation (length of perforation matters)
-		  else if ((exp_no == 16) || (exp_no == 113)) { // Forzando off -- Fast Decrescendo
+		  else if ((exp_no == 16) || (exp_no == 113)) {
 				for (int j=st; j<et; j++) {
 					isFastD->at(j) = true;
 				}
 
-		} else if ((exp_no == 20) || (exp_no == 109)) { // Forzando on -- Fast Crescendo
+		} else if ((exp_no == 20) || (exp_no == 109)) {
 				for (int j=st; j<et; j++) {
 					isFastC->at(j) = true;
 				}

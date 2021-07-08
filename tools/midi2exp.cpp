@@ -34,13 +34,24 @@ int main(int argc, char** argv) {
 	options.define("w|red|red-welte=b:", "set tempo for red welte rolls (95)");
 	options.define("g|green|green-welte=b:", "process a green welte roll");
 
-	options.define("sd|slow-decay-rate=d:2380", "Slow decay rate (Red Welte)"); // 2380
-	options.define("fc|fast-crescendo=d:300", "Fast crescendo (Red Welte)");    //180 --> 300
-	options.define("fd|fast-decrescendo=d:300", "Fast descrescendo (Red Welte)"); //17 ---> 300
-	options.define("wp|welte-piano=d:23.0", "(Red Welte)");
-	options.define("wmf|welte-mezzo-forte=d:60.0", "(Red Welte)");
-	options.define("wf|welte-forte=d:89.0", "(Red Welte)");
-	options.define("wl|welte-loud=d:70.0", "(Red Welte)");
+	//red
+	// options.define("sd|slow-decay-rate=d:2380", "Slow decay rate (Red Welte)"); // 2380
+	// options.define("fc|fast-crescendo=d:300", "Fast crescendo (Red Welte)");    //180 --> 300
+	// options.define("fd|fast-decrescendo=d:300", "Fast descrescendo (Red Welte)"); //17 ---> 300
+	// options.define("wp|welte-piano=d:23.0", "(Red Welte)");
+	// options.define("wmf|welte-mezzo-forte=d:60.0", "(Red Welte)");
+	// options.define("wf|welte-forte=d:89.0", "(Red Welte)");
+	// options.define("wl|welte-loud=d:70.0", "(Red Welte)");
+
+	// green
+	options.define("sd|slow-decay-rate=d:2366", "Slow decay rate (Red Welte)"); // 2380
+	options.define("fc|fast-crescendo=d:254", "Fast crescendo (Red Welte)");    //180 --> 300
+	options.define("fd|fast-decrescendo=d:269", "Fast descrescendo (Red Welte)"); //17 ---> 300
+	options.define("wp|welte-piano=d:35.0", "(Green Welte)");
+	options.define("wmf|welte-mezzo-forte=d:65.0", "Green Welte)");
+	options.define("wf|welte-forte=d:85.0", "(Red Welte)");
+	options.define("wl|welte-loud=d:75.0", "(Red Welte)");
+
 	options.define("v|version=s", "Add version number metadata");
 	options.define("i|ai|acceleration-inches=d:12.0", "acceleration update for every xx inches");
 	options.define("p|ap|acceleration-percent=d:0.22", "acceleration percent (based on every x inches)");

@@ -50,6 +50,7 @@ int main(int argc, char** argv) {
 	Expressionizer creator;
 	creator.setupRedWelte();
 	if (options.getBoolean("green")) {
+		cout << "Processing Green Welte rolls" << endl;
 		creator.setupGreenWelte();
 	}
 

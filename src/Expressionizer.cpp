@@ -2,7 +2,7 @@
 // Programmer:    Kitty Shi
 // Programmer:    Craig Stuart Sapp (translation to C++)
 // Creation Date: Thu Oct  4 16:32:27 PDT 2018
-// Last Modified: Tue Jun 30 16:52:30 PST 2021 test
+// Last Modified: Tue Jul  8 13:43:30 PST 2021
 // Filename:      midi2exp/src/Expressionizer.cpp
 // Website:       https://github.com/pianoroll/midi2exp
 // Syntax:        C++11
@@ -153,9 +153,9 @@ void Expressionizer::setupGreenWelte(void) {
 	PedalOffKey    = -18;   // no separate off key, it is MIDI key 18, note-off
 	SoftOffKey     = -111;  // no separate off key, it is MIDI key 111, note off
 	roll_type      = "green";
-	slow_decay_rate  = 2364;
-	fastC_decay_rate = 566; //
-	fastD_decay_rate = 300; // more than 245, more than 280 or just 189ms
+	slow_decay_rate  = 2366;
+	fastC_decay_rate = 254; // test roll shows 192 to 254ms from min to MF
+	fastD_decay_rate = 269; // test roll shows 176 to 269ms from max to min
 }
 
 
@@ -289,18 +289,6 @@ void Expressionizer::addSustainPedalling(int sourcetrack, int targetkey) {
 	MidiRoll& midifile = midi_data;
 	const int pedal_controller = 64;  // sustain pedal
 
-	bool hascontroller = hasControllerInTrack(bass_track, pedal_controller);
-	if (hascontroller) {
-		cerr << "Warning: Bass track already contains sustain pedalling." << endl;
-		return;
-	}
-
-	hascontroller = hasControllerInTrack(treble_track, pedal_controller);
-	if (hascontroller) {
-		cerr << "Warning: Treble track already contains sustain pedalling." << endl;
-		return;
-	}
-
 	// Search through the track for notes that represent pedal on or pedal off.
 	// The sustain pedal needs to be duplicated to be added to both the bass
 	// track/channel and the treble track/channel.
@@ -385,18 +373,6 @@ void Expressionizer::addSoftPedallingLockAndCancel(int sourcetrack, int onkey, i
 void Expressionizer::addSoftPedalling(int sourcetrack, int targetkey) {
 	MidiRoll& midifile = midi_data;
 	const int pedal_controller = 67;  // soft pedal
-
-	bool hascontroller = hasControllerInTrack(bass_track, pedal_controller);
-	if (hascontroller) {
-		cerr << "Warning: Bass track already contains soft pedalling." << endl;
-		return;
-	}
-
-	hascontroller = hasControllerInTrack(treble_track, pedal_controller);
-	if (hascontroller) {
-		cerr << "Warning: Treble track already contains soft pedalling." << endl;
-		return;
-	}
 
 	int tick;
 	MidiEventList& events = midifile[sourcetrack];

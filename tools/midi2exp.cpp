@@ -82,8 +82,14 @@ int main(int argc, char** argv) {
 
 	// green welte default tempo is 72.2222 if not specified.
 	if (options.getBoolean("red-welte")) {
-		creator.setRollTempo(95);    //94.6
-	} else if (options.getBoolean("tempo")) {
+		creator.setRollTempo(94.6);    //94.6
+		cout << "setting red welte tempo 94.6" << endl;
+	}
+	else if (options.getBoolean("green-welte")){
+		creator.setRollTempo(72.2);
+		cout << "setting green welte tempo 72.2" << endl;
+	}
+	else if (options.getBoolean("tempo")) {
 		creator.setRollTempo(options.getDouble("tempo"));
 	}
 

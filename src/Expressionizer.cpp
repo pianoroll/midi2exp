@@ -139,6 +139,12 @@ void Expressionizer::setupGreenWelte(void) {
 	// slow_step   =  cresc_rate * welte_mf / slow_decay_rate;
 	// fastC_step  =  cresc_rate * (welte_f - welte_p) / fastC_decay_rate;
 	// fastD_step  = -cresc_rate * (welte_f - welte_p) / fastD_decay_rate;
+	roll_type      = "green";
+	slow_decay_rate  = 2366;
+	fastC_decay_rate = 254; // test roll shows 192 to 254ms from min to MF
+	fastD_decay_rate = 269; // test roll shows 176 to 269ms from max to min
+
+	cout << "Fast crescendo rate:" << fastC_decay_rate << endl;
 	slow_step   =   (welte_mf - welte_p) / slow_decay_rate;
 	fastC_step  =   (welte_mf - welte_p) / fastC_decay_rate;
 	fastD_step  = - (welte_f - welte_p)  / fastD_decay_rate;
@@ -152,10 +158,6 @@ void Expressionizer::setupGreenWelte(void) {
 	SoftOnKey      = 111;   // no separate on key, it is MIDI key 111, note-on
 	PedalOffKey    = -18;   // no separate off key, it is MIDI key 18, note-off
 	SoftOffKey     = -111;  // no separate off key, it is MIDI key 111, note off
-	roll_type      = "green";
-	slow_decay_rate  = 2366;
-	fastC_decay_rate = 254; // test roll shows 192 to 254ms from min to MF
-	fastD_decay_rate = 269; // test roll shows 176 to 269ms from max to min
 }
 
 

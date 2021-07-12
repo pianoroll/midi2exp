@@ -100,9 +100,9 @@ class Expressionizer {
 	private:
 		std::string roll_type = "red";
 
-		double welte_p        = 38.0;  // 38.0
-		double welte_mf       = 60.0;
-		double welte_f        = 85.0;  // 85.0
+		double welte_p        = 35.0;  // 38.0 for red
+		double welte_mf       = 65.0;  // 60 for red
+		double welte_f        = 85.0;  // 85.0 for red
 		double welte_loud     = 70.0;
 		double cresc_rate     = 1.0;
 
@@ -178,10 +178,10 @@ class Expressionizer {
 		//double fastC_decay_rate = 170.0;
 		//double fastD_decay_rate = 150.0 * 2.2;
 
-		// Green Welte v1:
-		// double slow_decay_rate  = 2364;
-		// double fastC_decay_rate = 566; //
-		// double fastD_decay_rate = 280; // more than 245, more than 280 or just 189ms
+		// Green Welte v1 (0708):
+		// double slow_decay_rate  = 2366;
+		// double fastC_decay_rate = 254; //
+		// double fastD_decay_rate = 269; // more than 245, more than 280 or just 189ms
 
 		// experiment 0411
 		// Red Welte v1:

@@ -318,6 +318,7 @@ void MidiRoll::removeAcceleration (void) {
 		}
 		mr[0][i].clear();
 	}
+	MidiFile::removeEmpties();
 	// Need to add tempo = 60 at tick 0
 	MidiFile::addTempo(0, 0, 60.0);
 	MidiFile::sortTrack(0);

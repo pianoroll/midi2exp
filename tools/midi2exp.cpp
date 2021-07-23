@@ -2,7 +2,7 @@
 // Programmer:    Kitty Shi
 // Programmer:    Craig Stuart Sapp
 // Creation Date: Tue Jun 19 16:15:12 PDT 2018
-// Last Modified: Fri Mar 22 17:15:42 PDT 2018
+// Last Modified: Thu Jul 22 15:15:42 PDT 2018
 // Filename:      midi2exp/tools/midi2exp.cpp
 // Website:       https://github.com/pianoroll/midi2exp
 // Syntax:        C++11
@@ -33,6 +33,7 @@ int main(int argc, char** argv) {
 	options.define("x|display-extended-expression-info=b", "display booleans needed to create expression");
 	options.define("w|red|red-welte=b:", "set tempo for red welte rolls (95)");
 	options.define("g|green|green-welte=b:", "process a green welte roll");
+	options.define("l|licensee|licensee-welte=b:", "process a welte licensee roll");
 
 	//red
 	// options.define("sd|slow-decay-rate=d:2380", "Slow decay rate (Red Welte)"); // 2380
@@ -64,6 +65,10 @@ int main(int argc, char** argv) {
 		cout << "Processing Green Welte rolls" << endl;
 		creator.setupGreenWelte();
 	}
+	else if (options.getBoolean("licensee")) {
+		cout << "Processing Welte Licensee rolls" << endl;
+		creator.setupLicenseeWelte();
+	}
 
 	creator.setPunchDiameter(options.getDouble("punch-diameter"));
 	creator.setTrackerbarDiameter(options.getDouble("trackerbar-diameter"));
@@ -88,6 +93,11 @@ int main(int argc, char** argv) {
 	else if (options.getBoolean("green-welte")){
 		creator.setRollTempo(72.2);
 		cout << "setting green welte tempo 72.2" << endl;
+	}
+	// welte licensee tempo to be 80 by examining the test roll
+	else if (options.getBoolean("licensee-welte")){
+		creator.setRollTempo(80);
+		cout << "setting welte licensee tempo 80" << endl;
 	}
 	else if (options.getBoolean("tempo")) {
 		creator.setRollTempo(options.getDouble("tempo"));

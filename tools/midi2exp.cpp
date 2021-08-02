@@ -34,6 +34,7 @@ int main(int argc, char** argv) {
 	options.define("w|red|red-welte=b:", "set tempo for red welte rolls (95)");
 	options.define("g|green|green-welte=b:", "process a green welte roll");
 	options.define("l|licensee|licensee-welte=b:", "process a welte licensee roll");
+	options.define("h|88-roll=b:", "process an 88 roll");
 
 	//red
 	// options.define("sd|slow-decay-rate=d:2380", "Slow decay rate (Red Welte)"); // 2380
@@ -69,6 +70,10 @@ int main(int argc, char** argv) {
 		cout << "Processing Welte Licensee rolls" << endl;
 		creator.setupLicenseeWelte();
 	}
+	else if (options.getBoolean("88-roll")) {
+		cout << "Processing 88-note rolls" << endl;
+		creator.setup88Roll();
+	}
 
 	creator.setPunchDiameter(options.getDouble("punch-diameter"));
 	creator.setTrackerbarDiameter(options.getDouble("trackerbar-diameter"));
@@ -98,6 +103,10 @@ int main(int argc, char** argv) {
 	else if (options.getBoolean("licensee-welte")){
 		creator.setRollTempo(80);
 		cout << "setting welte licensee tempo 80" << endl;
+	}
+	else if (options.getBoolean("88-roll")){
+		creator.setRollTempo(60);
+		cout << "setting 88-note roll tempo 60" << endl;
 	}
 	else if (options.getBoolean("tempo")) {
 		creator.setRollTempo(options.getDouble("tempo"));

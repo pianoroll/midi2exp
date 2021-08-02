@@ -66,6 +66,7 @@ class Expressionizer {
 		void          setupRedWelte                (void);
 		void          setupLicenseeWelte           (void);
 		void          setupGreenWelte              (void);
+		void          setup88Roll                  (void);
 
 		void          setWelteP                    (double value);
 		void          setWelteMF                   (double value);
@@ -94,6 +95,7 @@ class Expressionizer {
 		void          calculateRedWelteExpression     (const std::string& option);
 		void          calculateLicenseeWelteExpression(const std::string& option);
 		void          calculateGreenWelteExpression   (const std::string& option);
+		void          calculate88Expression           (const std::string& option);
 		void          applyExpression                 (const std::string& option);
 		double        getPreviousNonzero              (std::vector<double>& myArray, int start_index);
 
@@ -104,6 +106,7 @@ class Expressionizer {
 		double welte_mf       = 65.0;  // 60 for red
 		double welte_f        = 85.0;  // 85.0 for red
 		double welte_loud     = 70.0;
+		double note_normal88  = 80;    // default 80 velocity for 88 notes
 		double cresc_rate     = 1.0;
 
 		double punch_width    = 21.5;  // diameter of the hole punches (in pixels/ticks)
@@ -136,6 +139,10 @@ class Expressionizer {
 		int    PedalOffKey;
 		int    SoftOnKey;
 		int    SoftOffKey;
+
+		// for 88-note rolls
+		int    Snakebite1;
+		int    Snakebite2;
 
 		bool   read_pedal     = true;
 

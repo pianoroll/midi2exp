@@ -82,7 +82,6 @@ void Expressionizer::setupGreenWelte(void) {
     fastC_decay_rate = 254; // test roll shows 192 to 254ms from min to MF
     fastD_decay_rate = 269; // test roll shows 176 to 269ms from max to min
 
-    cout << "Fast crescendo rate:" << fastC_decay_rate << endl;
     slow_step   =   (welte_mf - welte_p) / slow_decay_rate;
     fastC_step  =   (welte_mf - welte_p) / fastC_decay_rate;
     fastD_step  = - (welte_f - welte_p)  / fastD_decay_rate;
@@ -118,6 +117,7 @@ void Expressionizer::setup88Roll(void) {
     Snakebite1     = 109;
     Snakebite2     = 10;
     roll_type      = "88-roll";
+    left_adjust    = 0;
 
     fastC_decay_rate = 300; // use 300 from min to MF for now, need to change
     slow_step   =   -1;     // no slow step
@@ -227,8 +227,6 @@ void Expressionizer::setAcceleration(double inches, double percent) {
 void Expressionizer::addExpression(void) {
     setPan();
     midi_data.applyAcceleration(m_inches, m_percent);
-    cout <<"printing roll type: " << endl;
-    cout << roll_type << endl;
     if (roll_type == "red") {
         calculateRedWelteExpression("left_hand");
         calculateRedWelteExpression("right_hand");
@@ -1502,7 +1500,7 @@ void Expressionizer::calculate88Expression(const std::string &option) {
         int et = int((me->seconds + me->getDurationInSeconds()) * 1000.0 + 0.5);
 
         if (exp_no == 109) { // Snakebite (only consider one) -- Fast Crescendo
-            for (int j=st; j<et; j++) {
+            for (int j=max(0,st-snake_gracetime); j< min(et+snake_gracetime,exp_length); j++) {
                 isFastC->at(j) = true;
             }
         }
@@ -1513,7 +1511,7 @@ void Expressionizer::calculate88Expression(const std::string &option) {
     for (int i=1; i<exp_length; i++) {
 
         if (isFastC->at(i)) {
-            expression_list->at(i) = 95;   // 95 for snakebite velocity
+            expression_list->at(i) = snake_f;   // 95 for snakebite velocity
         }
     }
 }

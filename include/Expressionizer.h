@@ -106,8 +106,10 @@ class Expressionizer {
 		double welte_mf       = 65.0;  // 60 for red
 		double welte_f        = 85.0;  // 85.0 for red
 		double welte_loud     = 70.0;
-		double note_normal88  = 80;    // default 80 velocity for 88 notes
+		double note_normal88  = 75;    // default velocity for 88 notes
 		double cresc_rate     = 1.0;
+		double snake_f        = 95;    // snakebite velocity
+		int snake_gracetime   = 200;    // +- 200ms grace period for snakebite to take effect
 
 		double punch_width    = 21.5;  // diameter of the hole punches (in pixels/ticks)
 		double punch_fraction = 0.75;  // extention length of holes (0.75 = 75% longer)

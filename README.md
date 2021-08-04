@@ -22,4 +22,4 @@ GNU make must be installed, and gcc version 4.9 or higher (or most versions of c
 -g: green welte rolls \
 -l: welte licensee rolls \
 -h: 88-note rolls \
--r: remove expression tracks \
+-r: remove expression tracks

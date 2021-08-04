@@ -2,7 +2,7 @@
 // Programmer:    Kitty Shi
 // Programmer:    Craig Stuart Sapp
 // Creation Date: Tue Jun 19 16:15:12 PDT 2018
-// Last Modified: Thu Jul 22 15:15:42 PDT 2018
+// Last Modified: Wed Aug 4  15:15:42 PDT 2021
 // Filename:      midi2exp/tools/midi2exp.cpp
 // Website:       https://github.com/pianoroll/midi2exp
 // Syntax:        C++11
@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
 	options.define("w|red|red-welte=b:", "set tempo for red welte rolls (95)");
 	options.define("g|green|green-welte=b:", "process a green welte roll");
 	options.define("l|licensee|licensee-welte=b:", "process a welte licensee roll");
-	options.define("h|88-roll=b:", "process an 88 roll");
+	options.define("h|88-note=b:", "process an 88-note roll");
 
 	//red
 	// options.define("sd|slow-decay-rate=d:2380", "Slow decay rate (Red Welte)"); // 2380
@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
 		cout << "Processing Welte Licensee rolls" << endl;
 		creator.setupLicenseeWelte();
 	}
-	else if (options.getBoolean("88-roll")) {
+	else if (options.getBoolean("88-note")) {
 		cout << "Processing 88-note rolls" << endl;
 		creator.setup88Roll();
 	}
@@ -104,7 +104,7 @@ int main(int argc, char** argv) {
 		creator.setRollTempo(80);
 		cout << "setting welte licensee tempo 80" << endl;
 	}
-	else if (options.getBoolean("88-roll")){
+	else if (options.getBoolean("88-note")){
 		creator.setRollTempo(60);
 		cout << "setting 88-note roll tempo 60" << endl;
 	}

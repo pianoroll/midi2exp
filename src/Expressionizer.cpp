@@ -2,7 +2,7 @@
 // Programmer:    Kitty Shi
 // Programmer:    Craig Stuart Sapp (translation to C++)
 // Creation Date: Thu Oct  4 16:32:27 PDT 2018
-// Last Modified: Tue Jul  8 13:43:30 PST 2021
+// Last Modified: Wed Aug  4 13:43:30 PST 2021
 // Filename:      midi2exp/src/Expressionizer.cpp
 // Website:       https://github.com/pianoroll/midi2exp
 // Syntax:        C++11
@@ -113,16 +113,11 @@ void Expressionizer::setupGreenWelte(void) {
 
 void Expressionizer::setup88Roll(void) {
     // expression keys for Red Welte rolls:
-    PedalOnKey     = 18;
-    Snakebite1     = 109;
-    Snakebite2     = 10;
-    roll_type      = "88-roll";
-    left_adjust    = 0;
-
-    fastC_decay_rate = 300; // use 300 from min to MF for now, need to change
-    slow_step   =   -1;     // no slow step
-    fastC_step  =   (welte_mf - welte_p) / fastC_decay_rate;
-    fastD_step  =   -1;     // no fast step
+    PedalOnKey        = 18;
+    Snakebite_treble  = 109;
+    Snakebite_bass    = 19;
+    roll_type         = "88-note";
+    left_adjust       = 0;
 
 }
 
@@ -236,7 +231,7 @@ void Expressionizer::addExpression(void) {
     } else if (roll_type == "green") {
         calculateGreenWelteExpression("left_hand");
         calculateGreenWelteExpression("right_hand");
-    } else if (roll_type == "88-roll"){
+    } else if (roll_type == "88-note"){
         calculate88Expression("left_hand");
         calculate88Expression("right_hand");
     } else {
@@ -256,7 +251,7 @@ void Expressionizer::addExpression(void) {
     } else if (roll_type == "green") {
         addSustainPedalling(bass_exp_track, PedalOnKey);
         addSoftPedalling(treble_exp_track, SoftOnKey);
-    } else if (roll_type == "88-roll"){
+    } else if (roll_type == "88-note"){
         addSustainPedalling(bass_exp_track, PedalOnKey);
     }
 
@@ -1453,6 +1448,8 @@ void Expressionizer::calculateLicenseeWelteExpression(const std::string &option)
 //      According to the following expression code of Green Welte
 //      Midi track 3 (On MIDI channel 1):
 //         18: Sustain Pedal
+//         19: Bass Snakebite1
+//         20: Bass Snakebite2
 //
 //      Midi track 4 (On MIDI channel 4 offset):
 //         109: Snakebite1
@@ -1499,7 +1496,7 @@ void Expressionizer::calculate88Expression(const std::string &option) {
         int st = int(me->seconds * 1000.0 + 0.5);  // start time in milliseconds
         int et = int((me->seconds + me->getDurationInSeconds()) * 1000.0 + 0.5);
 
-        if (exp_no == 109) { // Snakebite (only consider one) -- Fast Crescendo
+        if (exp_no == Snakebite_treble or exp_no == Snakebite_bass) { // Snakebite (only consider one) -- Fast Crescendo
             for (int j=max(0,st-snake_gracetime); j< min(et+snake_gracetime,exp_length); j++) {
                 isFastC->at(j) = true;
             }

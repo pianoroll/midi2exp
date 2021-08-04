@@ -2,7 +2,7 @@
 // Programmer:    Kitty Shi
 // Programmer:    Craig Stuart Sapp (translation to C++)
 // Creation Date: Thu Oct  4 16:32:27 PDT 2018
-// Last Modified: Mon Feb 24 15:36:22 PST 2020
+// Last Modified: Wed Aug  4 15:36:22 PST 2021
 // Filename:      midi2exp/include/Expressionizer.h
 // Website:       https://github.com/pianoroll/midi2exp
 // Syntax:        C++11
@@ -142,9 +142,9 @@ class Expressionizer {
 		int    SoftOnKey;
 		int    SoftOffKey;
 
-		// for 88-note rolls
-		int    Snakebite1;
-		int    Snakebite2;
+		// for 88-note rolls (treble and bass)
+		int    Snakebite_treble;
+		int    Snakebite_bass;
 
 		bool   read_pedal     = true;
 

@@ -1,5 +1,5 @@
 # midi2exp
-#This repository converts pianoroll raw MIDI files into expressionized MIDI files
+This repository converts pianoroll raw MIDI files into expressionized MIDI files
 
 ## Compiling
 

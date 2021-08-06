@@ -93,7 +93,7 @@ class Expressionizer {
 		void          addMetadata                     (void);
 		bool          hasControllerInTrack            (int track, int controller);
 		void          calculateRedWelteExpression     (const std::string& option);
-		void          calculateLicenseeWelteExpression(const std::string& option);
+		std::vector<double>*          calculateLicenseeWelteExpression(const std::string& option);
 		void          calculateGreenWelteExpression   (const std::string& option);
 		void          calculate88Expression           (const std::string& option);
 		void          applyExpression                 (const std::string& option);
@@ -103,8 +103,8 @@ class Expressionizer {
 		std::string roll_type = "red";
 
 		double welte_p        = 35.0;  //
-		double welte_mf       = 65.0;  //
-		double welte_f        = 95.0;  //
+		double welte_mf       = 60.0;  //
+		double welte_f        = 90.0;  //
 		double welte_loud     = 75.0;
 		double note_normal88  = 75;    // default velocity for 88 notes
 		double cresc_rate     = 1.0;

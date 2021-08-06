@@ -154,7 +154,7 @@ void Expressionizer::setupLicenseeWelte(void) {
     SoftOffKey     = 20;
     roll_type      = "licensee";
     slow_decay_rate  = 2163; // test rolls shows 2163ms for treble SC from min to MF
-    fastC_decay_rate = 237;  // test roll shows around 193ms-237ms from min to MF
+    fastC_decay_rate = 220;  // test roll shows around 193ms-237ms from min to MF
     fastD_decay_rate = 186;  // test roll shows around 186ms from MF to min
 
     slow_step   =   (welte_mf - welte_p) / slow_decay_rate;
@@ -233,8 +233,9 @@ void Expressionizer::addExpression(void) {
         calculateRedWelteExpression("left_hand");
         calculateRedWelteExpression("right_hand");
     } else if (roll_type == "licensee") {
-        calculateLicenseeWelteExpression("left_hand");
-        calculateLicenseeWelteExpression("right_hand");
+        vector<double>* left = calculateLicenseeWelteExpression("left_hand");
+        vector<double>* right = calculateLicenseeWelteExpression("right_hand");
+        cout << right;
     } else if (roll_type == "green") {
         calculateGreenWelteExpression("left_hand");
         calculateGreenWelteExpression("right_hand");
@@ -1237,7 +1238,7 @@ void Expressionizer::calculateGreenWelteExpression(const std::string& option) {
 //         113: (1)Treble MF off
 //
 
-void Expressionizer::calculateLicenseeWelteExpression(const std::string &option) {
+vector<double>* Expressionizer::calculateLicenseeWelteExpression(const std::string &option) {
     int track_index;
     vector<double>* expression_list;
     vector<double>* isMF;
@@ -1442,6 +1443,10 @@ void Expressionizer::calculateLicenseeWelteExpression(const std::string &option)
         //cout << ("newV after process: " + std::to_string(expression_list->at(i))) << endl;
         //printf("newV after process: %f\n", expression_list->at(i));
     }
+    for (int i=1; i<exp_length; i++) {
+        cout << expression_list->at(i) << ",";
+    }
+    return expression_list;
 }
 
 

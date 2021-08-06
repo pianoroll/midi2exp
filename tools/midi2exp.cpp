@@ -49,10 +49,10 @@ int main(int argc, char** argv) {
 	options.define("sd|slow-decay-rate=d:2366", "Slow decay rate (Red Welte)"); // 2380
 	options.define("fc|fast-crescendo=d:254", "Fast crescendo (Red Welte)");    //180 --> 300
 	options.define("fd|fast-decrescendo=d:269", "Fast descrescendo (Red Welte)"); //17 ---> 300
-	options.define("wp|welte-piano=d:35.0", "(Green Welte)");
-	options.define("wmf|welte-mezzo-forte=d:65.0", "Green Welte)");
-	options.define("wf|welte-forte=d:85.0", "(Red Welte)");
-	options.define("wl|welte-loud=d:75.0", "(Red Welte)");
+	options.define("wp|welte-piano=d:35.0", "Minimum velocity");
+	options.define("wmf|welte-mezzo-forte=d:60.0", "MezzoForte velocity)");
+	options.define("wf|welte-forte=d:90.0", "Forte velocity");
+	options.define("wl|welte-loud=d:70.0", "Loud velocity");
 
 	options.define("v|version=s", "Add version number metadata");
 	options.define("i|ai|acceleration-inches=d:12.0", "acceleration update for every xx inches");
@@ -99,10 +99,10 @@ int main(int argc, char** argv) {
 		creator.setRollTempo(72.2);
 		cout << "setting green welte tempo 72.2" << endl;
 	}
-	// welte licensee tempo to be 75 by examining the test roll
+	// welte licensee tempo to be 80 by examining the test roll
 	else if (options.getBoolean("licensee-welte")){
-		creator.setRollTempo(75);
-		cout << "setting welte licensee tempo 75" << endl;
+		creator.setRollTempo(79);
+		cout << "setting welte licensee tempo 80" << endl;
 	}
 	else if (options.getBoolean("88-note")){
 		creator.setRollTempo(60);

@@ -153,13 +153,13 @@ void Expressionizer::setupLicenseeWelte(void) {
     SoftOnKey      = 21;
     SoftOffKey     = 20;
     roll_type      = "licensee";
-    slow_decay_rate  = 2163;// test rolls hows 2163ms for treble SC from min to MF
-    fastC_decay_rate = 209; // test roll shows around 158ms-209ms from min to MF
-    fastD_decay_rate = 190; // test 7 shows 190ms for treble from max to min
+    slow_decay_rate  = 2163; // test rolls shows 2163ms for treble SC from min to MF
+    fastC_decay_rate = 237;  // test roll shows around 193ms-237ms from min to MF
+    fastD_decay_rate = 186;  // test roll shows around 186ms from MF to min
 
     slow_step   =   (welte_mf - welte_p) / slow_decay_rate;
     fastC_step  =   (welte_mf - welte_p) / fastC_decay_rate;
-    fastD_step  = - (welte_f - welte_p)  / fastD_decay_rate;
+    fastD_step  = - (welte_mf - welte_p)  / fastD_decay_rate;
 
 }
 

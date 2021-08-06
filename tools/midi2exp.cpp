@@ -99,10 +99,10 @@ int main(int argc, char** argv) {
 		creator.setRollTempo(72.2);
 		cout << "setting green welte tempo 72.2" << endl;
 	}
-	// welte licensee tempo to be 80 by examining the test roll
+	// welte licensee tempo to be 75 by examining the test roll
 	else if (options.getBoolean("licensee-welte")){
-		creator.setRollTempo(80);
-		cout << "setting welte licensee tempo 80" << endl;
+		creator.setRollTempo(75);
+		cout << "setting welte licensee tempo 75" << endl;
 	}
 	else if (options.getBoolean("88-note")){
 		creator.setRollTempo(60);

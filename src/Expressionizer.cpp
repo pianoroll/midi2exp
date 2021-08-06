@@ -98,33 +98,11 @@ void Expressionizer::setupGreenWelte(void) {
 }
 
 
+
+
 //////////////////////////////
 //
 // Expressionizer::setupLicenseeWelte -- Prepare constants for Licensee Welte rolls.
-//
-// Licensee width: 11.25" & 9 holes/inch
-//
-// Hole #  MIDI  Meaning
-// ================================
-//          18   Sustain pedal
-//          109  Snakebite
-//          110  Snakebite
-//
-
-void Expressionizer::setup88Roll(void) {
-    // expression keys for Red Welte rolls:
-    PedalOnKey        = 18;
-    Snakebite_treble  = 109;
-    Snakebite_bass    = 19;
-    roll_type         = "88-note";
-    left_adjust       = 0;
-
-}
-
-
-//////////////////////////////
-//
-// Expressionizer::setup88Roll -- Prepare constants for Licensee Welte rolls.
 //
 // Licensee width: 11.25" & 9 holes/inch
 //
@@ -175,15 +153,44 @@ void Expressionizer::setupLicenseeWelte(void) {
     SoftOnKey      = 21;
     SoftOffKey     = 20;
     roll_type      = "licensee";
-    slow_decay_rate  = 2380;  //2380
-    fastC_decay_rate = 300; // test roll shows around 170ms-200ms from min to MF hook
-    fastD_decay_rate = 400; // test roll shows 166ms -- 300ms at max 400ms fast decrescendo can b
+    slow_decay_rate  = 2163;// test rolls hows 2163ms for treble SC from min to MF
+    fastC_decay_rate = 209; // test roll shows around 158ms-209ms from min to MF
+    fastD_decay_rate = 190; // test 7 shows 190ms for treble from max to min
 
     slow_step   =   (welte_mf - welte_p) / slow_decay_rate;
     fastC_step  =   (welte_mf - welte_p) / fastC_decay_rate;
     fastD_step  = - (welte_f - welte_p)  / fastD_decay_rate;
 
 }
+
+
+//////////////////////////////
+//
+// Expressionizer::setup88Roll -- Prepare constants for 88-note rolls.
+//
+//
+// Hole #  MIDI  Meaning
+// ================================
+//          18     Sustain pedal
+//          19     Bass Snakebite
+//          20     Bass Snakebite
+//          21-64  Note A0 to E4
+//          65-108 Note F4 to C8
+//          109    Treble Snakebite
+//          110    Treble Snakebite
+//
+
+void Expressionizer::setup88Roll(void) {
+    // expression keys for Red Welte rolls:
+    PedalOnKey        = 18;
+    Snakebite_treble  = 109;
+    Snakebite_bass    = 19;
+    roll_type         = "88-note";
+    left_adjust       = 0;
+
+}
+
+
 
 //////////////////////////////
 //

@@ -102,10 +102,10 @@ class Expressionizer {
 	private:
 		std::string roll_type = "red";
 
-		double welte_p        = 35.0;  // 38.0 for red
-		double welte_mf       = 65.0;  // 60 for red
-		double welte_f        = 85.0;  // 85.0 for red
-		double welte_loud     = 70.0;
+		double welte_p        = 35.0;  //
+		double welte_mf       = 65.0;  //
+		double welte_f        = 95.0;  //
+		double welte_loud     = 75.0;
 		double note_normal88  = 75;    // default velocity for 88 notes
 		double cresc_rate     = 1.0;
 		double snake_f        = 95;    // snakebite velocity

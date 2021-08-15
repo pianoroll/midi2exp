@@ -118,7 +118,7 @@ class Expressionizer {
 		double tracker_fraction = 0.75;               // for hole extension, 75% of the tracker bar diameter
 
 		bool trackbar_correction_done = false;
-		bool delete_expresison_tracks = false;
+		bool delete_expression_tracks = false;
 
 		// version
 		std::string m_version;

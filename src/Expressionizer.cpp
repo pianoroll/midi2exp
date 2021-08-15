@@ -565,7 +565,7 @@ void Expressionizer::updateMidiTimingInfo(void) {
 //
 
 bool Expressionizer::writeMidiFile(std::string filename) {
-    if ((midi_data.getTrackCount() == 5) && delete_expresison_tracks) {
+    if ((midi_data.getTrackCount() == 5) && delete_expression_tracks) {
         midi_data.deleteTrack(4);
         midi_data.deleteTrack(3);
     }
@@ -1660,7 +1660,7 @@ double Expressionizer::getPunchExtensionFraction(void) {
 //
 
 void Expressionizer::removeExpressionTracksOnWrite(void) {
-    delete_expresison_tracks = true;
+    delete_expression_tracks = true;
 }
 
 

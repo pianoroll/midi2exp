@@ -329,24 +329,26 @@ void MidiRoll::removeAcceleration (void) {
 //////////////////////////////
 //
 // MidiRoll::applyAcceleration -- Emulate roll acceleration according
-//    to the input paramters.
-// default values:
-//      inches  = 12.0;
-//      percent = 0.22
+//    to the input parameter.
+// default value:
+//      accelFtPerMin2 = 0.2;
 //
 
-void MidiRoll::applyAcceleration(double inches, double percent) {
-	removeAcceleration();  // adds first tempo at 60.0
-	double factor  = 1.0 + percent / 100.0;
-	int    maxtick = getMaxTick();
-	double step    = getLengthDpi() * inches;
-	int    count   = int(maxtick / step);
-	double tempo   = 60.0 * factor;
-	for (int i=1; i<count; i++) {
-		addTempo(0, (int)(i*step+0.5), tempo);
-		//tempo *= factor;
-		factor += percent / 100.0;
-		tempo = 60 * factor;
+void MidiRoll::applyAcceleration(double accelFtPerMin2) {
+	removeAcceleration();  // adds one tempo=60.0 message at tick 0
+	double ticksPerFt = getLengthDpi() * 12.0;
+	double tempo      = 60.0;
+	double minutediv  = .1; // how often the tempo is updated, could be param
+	double startspeed = (getTPQ() * tempo) / ticksPerFt;
+	double speed      = startspeed;
+	double minute     = 0.0;
+	int    tick       = 0;
+	while (tick < getMaxTick()) {
+		addTempo(0, tick, tempo);
+		minute += minutediv;
+		tick += (int)(speed * minutediv * ticksPerFt);
+		speed = startspeed + minute * accelFtPerMin2;
+		tempo = speed * ticksPerFt / getTPQ();
 	}
 	sortTrack(0);
 }

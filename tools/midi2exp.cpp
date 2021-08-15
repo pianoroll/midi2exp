@@ -44,6 +44,7 @@ int main(int argc, char** argv) {
 	// options.define("wmf|welte-mezzo-forte=d:60.0", "(Red Welte)");
 	// options.define("wf|welte-forte=d:89.0", "(Red Welte)");
 	// options.define("wl|welte-loud=d:70.0", "(Red Welte)");
+	// options.define("ac|accel-ft-per-min2=d:0.3147", "acceleration in feet per minute^2");
 
 	// green
 	options.define("sd|slow-decay-rate=d:2366", "Slow decay rate (Red Welte)"); // 2380
@@ -55,8 +56,7 @@ int main(int argc, char** argv) {
 	options.define("wl|welte-loud=d:70.0", "Loud velocity");
 
 	options.define("v|version=s", "Add version number metadata");
-	options.define("i|ai|acceleration-inches=d:12.0", "acceleration update for every xx inches");
-	options.define("p|ap|acceleration-percent=d:0.22", "acceleration percent (based on every x inches)");
+	options.define("ac|accel-ft-per-min2=d:0.2", "acceleration in feet per minute^2");
 
 	options.process(argc, argv);
 
@@ -90,10 +90,12 @@ int main(int argc, char** argv) {
 		creator.readMidiFile(options.getArg(1));
 	}
 
+	// default acceleration is 0.2, except for red Welte rolls
 	// green welte default tempo is 72.2222 if not specified.
 	if (options.getBoolean("red-welte")) {
 		creator.setRollTempo(94.6);    //94.6
 		cout << "setting red welte tempo 94.6" << endl;
+		creator.setAcceleration(0.3147);
 	}
 	else if (options.getBoolean("green-welte")){
 		creator.setRollTempo(72.2);
@@ -147,9 +149,9 @@ int main(int argc, char** argv) {
 		creator.setVersion(options.getString("version"));
 	}
 
-	double inches = options.getDouble("acceleration-inches");
-	double percent = options.getDouble("acceleration-percent");
-	creator.setAcceleration(inches, percent);
+	if (options.getBoolean("accel-ft-per-min2")) {
+		creator.setAcceleration(options.getDouble("accel-ft-per-min2"));
+	}
 
 	creator.addExpression();
 	creator.setPianoTimbre();

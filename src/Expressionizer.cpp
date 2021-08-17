@@ -204,19 +204,15 @@ Expressionizer::~Expressionizer(void) {
 
 //////////////////////////////
 //
-// Expressionizer::setAcceleration -- Set acceleration by xx percent every xx inches.
+// Expressionizer::setAcceleration -- Set acceleration in feet per minute^2.
 //
 
-void Expressionizer::setAcceleration(double inches, double percent) {
-    if (inches <= 0.0) {
-        return;
-    }
-    if (percent <= 0.0) {
+void Expressionizer::setAcceleration(double accelFtPerMin2) {
+    if (accelFtPerMin2 < 0.0) {
         return;
     }
 
-    m_inches = inches;
-    m_percent = percent;
+    m_accelFtPerMin2 = accelFtPerMin2;
 }
 
 
@@ -228,7 +224,7 @@ void Expressionizer::setAcceleration(double inches, double percent) {
 
 void Expressionizer::addExpression(void) {
     setPan();
-    midi_data.applyAcceleration(m_inches, m_percent);
+    midi_data.applyAcceleration(m_accelFtPerMin2);
     if (roll_type == "red") {
         calculateRedWelteExpression("left_hand");
         calculateRedWelteExpression("right_hand");
@@ -569,7 +565,7 @@ void Expressionizer::updateMidiTimingInfo(void) {
 //
 
 bool Expressionizer::writeMidiFile(std::string filename) {
-    if ((midi_data.getTrackCount() == 5) && delete_expresison_tracks) {
+    if ((midi_data.getTrackCount() == 5) && delete_expression_tracks) {
         midi_data.deleteTrack(4);
         midi_data.deleteTrack(3);
     }
@@ -611,14 +607,9 @@ void Expressionizer::addMetadata(void) {
     }
 
     ss.str("");
-    ss << "\t\t" << m_inches;
+    ss << "\t\t" << m_accelFtPerMin2;
     sss = ss.str();
-    midi_data.setMetadata("ACCEL_INCH", sss);
-
-    ss.str("");
-    ss << "\t" << m_percent;
-    sss = ss.str();
-    midi_data.setMetadata("ACCEL_PERCENT", sss);
+    midi_data.setMetadata("ACCEL_FT/MIN^2", sss);
 
     if (trackbar_correction_done) {
         int correction = int(getTrackerbarDiameter() * getPunchExtensionFraction() + 0.5);
@@ -1669,7 +1660,7 @@ double Expressionizer::getPunchExtensionFraction(void) {
 //
 
 void Expressionizer::removeExpressionTracksOnWrite(void) {
-    delete_expresison_tracks = true;
+    delete_expression_tracks = true;
 }
 
 

@@ -48,8 +48,7 @@ class MidiRoll : public MidiFile {
 
 		// acceleration emulation:
 		void                    removeAcceleration (void);
-		void                    applyAcceleration  (double inches,
-		                                            double percent);
+		void                    applyAcceleration  (double accelFtPerMin2);
       // tick conversions:
 		void                    convertToMillisecondTicks (void);
 

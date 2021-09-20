@@ -86,7 +86,7 @@ class Expressionizer {
 		double        getFastDecrescendo           (void);
 		double        getLeftRightDiff             (void);
 
-		void          setAcceleration              (double inches, double percent);
+		void          setAcceleration              (double accelFtPerMin2);
 
 
 	protected:
@@ -118,12 +118,13 @@ class Expressionizer {
 		double tracker_fraction = 0.75;               // for hole extension, 75% of the tracker bar diameter
 
 		bool trackbar_correction_done = false;
-		bool delete_expresison_tracks = false;
+		bool delete_expression_tracks = false;
 
 		// version
 		std::string m_version;
-		double      m_inches  = 12.0;
-		double      m_percent = 0.22;
+
+		// default feet/minute^2 acceleration for all except red Welte rolls
+		double m_accelFtPerMin2 = 0.2;
 
 		// left_adjust: reduce loudness of bass register (for attack velocities)
 		int left_adjust       = -5;

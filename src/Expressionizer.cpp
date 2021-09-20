@@ -235,7 +235,7 @@ void Expressionizer::addExpression(void) {
     } else if (roll_type == "licensee") {
         vector<double>* left = calculateLicenseeWelteExpression("left_hand");
         vector<double>* right = calculateLicenseeWelteExpression("right_hand");
-        cout << right;
+        //cout << right;
     } else if (roll_type == "green") {
         calculateGreenWelteExpression("left_hand");
         calculateGreenWelteExpression("right_hand");
@@ -1443,9 +1443,9 @@ vector<double>* Expressionizer::calculateLicenseeWelteExpression(const std::stri
         //cout << ("newV after process: " + std::to_string(expression_list->at(i))) << endl;
         //printf("newV after process: %f\n", expression_list->at(i));
     }
-    for (int i=1; i<exp_length; i++) {
-        cout << expression_list->at(i) << ",";
-    }
+    //for (int i=1; i<exp_length; i++) {
+    //    cout << expression_list->at(i) << ",";
+    //}
     return expression_list;
 }
 

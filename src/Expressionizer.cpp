@@ -78,8 +78,8 @@ void Expressionizer::setupGreenWelte(void) {
     // fastC_step  =  cresc_rate * (welte_f - welte_p) / fastC_decay_rate;
     // fastD_step  = -cresc_rate * (welte_f - welte_p) / fastD_decay_rate;
     roll_type      = "green";
-    slow_decay_rate  = 2366;
-    fastC_decay_rate = 254; // test roll shows 192 to 254ms from min to MF
+    slow_decay_rate  = 2455;
+    fastC_decay_rate = 245; // test roll shows 192 to 254ms from min to MF
     fastD_decay_rate = 269; // test roll shows 176 to 269ms from max to min
 
     slow_step   =   (welte_mf - welte_p) / slow_decay_rate;

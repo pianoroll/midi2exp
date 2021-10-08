@@ -1769,7 +1769,7 @@ void Expressionizer::calculateDuoArtExpression(const std::string &option) {
             pressure->at(i) = step2pressure(step->at(i), "right");
         }
         // map pressure level to MIDI velocity, 5-33 to 38-95
-        expression_list->at(i) = (pressure->at(i)-5.0)/28.0*57.0 + 38;
+        expression_list->at(i) = (pressure->at(i)-4.0)/29.0*57.0 + 38;
         //cout << expression_list->at(i) << endl;
         //cout << step->at(i) << "--" << pressure->at(i) << "--" << expression_list->at(i) << endl;
         if (isFastC->at(i)) {

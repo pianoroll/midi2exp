@@ -67,6 +67,7 @@ class Expressionizer {
 		void          setupLicenseeWelte           (void);
 		void          setupGreenWelte              (void);
 		void          setup88Roll                  (void);
+		void		  setupDuoArt                  (void);
 
 		void          setWelteP                    (double value);
 		void          setWelteMF                   (double value);
@@ -96,8 +97,10 @@ class Expressionizer {
 		std::vector<double>*          calculateLicenseeWelteExpression(const std::string& option);
 		void          calculateGreenWelteExpression   (const std::string& option);
 		void          calculate88Expression           (const std::string& option);
+		void          calculateDuoArtExpression       (const std::string& option);
 		void          applyExpression                 (const std::string& option);
 		double        getPreviousNonzero              (std::vector<double>& myArray, int start_index);
+		int           step2pressure                   (int stepval,const std::string& option);
 
 	private:
 		std::string roll_type = "red";
@@ -143,9 +146,19 @@ class Expressionizer {
 		int    SoftOnKey;
 		int    SoftOffKey;
 
-		// for 88-note rolls (treble and bass)
+		// for 88-note rolls and duo-art rolls (treble and bass)
 		int    Snakebite_treble;
 		int    Snakebite_bass;
+
+		// for duo-art
+		int    BassVolume1;
+		int    BassVolume2;
+		int    BassVolume4;
+		int    BassVolume8;
+		int    TrebleVolume1;
+		int    TrebleVolume2;
+		int    TrebleVolume4;
+		int    TrebleVolume8;
 
 		bool   read_pedal     = true;
 
@@ -175,6 +188,8 @@ class Expressionizer {
 		std::vector<double> isSlowC_bass;
 		std::vector<double> isFastC_bass;
 		std::vector<double> isFastD_bass;
+		std::vector<double> step_bass;       // for duo-art
+		std::vector<double> pressure_bass;   // for duo-art
 
 		// exp_treble: model expression at every millisecond for treble register.
 		std::vector<double> exp_treble;
@@ -182,6 +197,8 @@ class Expressionizer {
 		std::vector<double> isSlowC_treble;
 		std::vector<double> isFastC_treble;
 		std::vector<double> isFastD_treble;
+		std::vector<double> step_treble;       // for duo-art
+		std::vector<double> pressure_treble;   // for duo-art
 
   		// Regulation of crescendo and decrescendo rate
 		//double slow_decay_rate  = 2380.0 * 2.0;

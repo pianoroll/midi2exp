@@ -190,6 +190,60 @@ void Expressionizer::setup88Roll(void) {
 
 }
 
+//////////////////////////////
+//
+// Expressionizer::setupDuoArt -- Prepare constants for duo-art rolls.
+//
+//
+//     Hole# Meaning                         MIDI key
+// =====================================================
+//       1:  Rewind (wide hole)              MIDI Key 16
+//       2:  Empty (overlaps with rewind)    MIDI Key 17
+//       3:  Soft pedal                      MIDI Key 18
+//       4:  Bass theme snakebite            MIDI Key 19
+//       5:  Bass theme snakebite            MIDI Key 20
+//       6:  Bass volume 1                   MIDI Key 21
+//       7:  Bass volume 2                   MIDI Key 22
+//       8:  Bass volume 4                   MIDI Key 23
+//       9:  Bass volume 8                   MIDI Key 24
+//           C#1 to G#7             (MIDI notes 25 to 104)
+//       10: C#1                             MIDI Key 25
+//       ...
+//       48: D#4                             MIDI Key 63
+//    Treble register:
+//       49: E4                              MIDI Key 64
+//       ...
+//       89: G#7                             MIDI Key 104
+//   9 expression columns on the treble side:
+//       90: -9:  Treble volume 8            MIDI Key 105
+//       91: -8:  Treble volume 4            MIDI Key 106
+//       92: -7:  Treble volume 2            MIDI Key 107
+//       93: -6:  Treble volume 1            MIDI Key 108
+//       94: -5:  Treble theme snakebite     MIDI Key 109
+//       95: -4:  Treble theme snakebite     MIDI Key 110
+//       96: -3:  Empty                      MIDI Key 111
+//       97: -2:  Empty                      MIDI Key 112
+//       98: -1:  Sustain pedal              MIDI Key 113
+//
+void Expressionizer::setupDuoArt(void) {
+    roll_type        = "duo-art";
+
+    // Expression keys for Green Welte rolls:
+    PedalOnKey       = 113;    // no separate on key, it is MIDI key 18, note-on
+    SoftOnKey        = 18;   // no separate on key, it is MIDI key 111, note-on
+    Snakebite_treble = 109;
+    Snakebite_bass   = 19;
+
+    BassVolume1      = 21;
+    BassVolume2      = 22;
+    BassVolume4      = 23;
+    BassVolume8      = 24;
+    TrebleVolume1    = 108;
+    TrebleVolume2    = 107;
+    TrebleVolume4    = 106;
+    TrebleVolume8    = 105;
+}
+
 
 
 //////////////////////////////
@@ -238,6 +292,9 @@ void Expressionizer::addExpression(void) {
     } else if (roll_type == "88-note"){
         calculate88Expression("left_hand");
         calculate88Expression("right_hand");
+    } else if (roll_type == "duo-art"){
+        calculateDuoArtExpression("left_hand");
+        calculateDuoArtExpression("right_hand");
     } else {
         cerr << "Don't know roll type: " << roll_type << endl;
         exit(1);
@@ -736,8 +793,89 @@ double Expressionizer::getPreviousNonzero(vector<double>& myArray,
 }
 
 
+//////////////////////////////
+//
+// Expressionizer::step2pressure -- convert duo-art step value to pressure value
+//
 
+int Expressionizer::step2pressure(int stepval,const std::string& option){
+    if (option == "left_hand") {
+        if (stepval == 0){
+            return 4;
+        } else if (stepval == 1){
+            return 5;
+        } else if (stepval == 2){
+            return 7;
+        } else if (stepval == 3){
+            return 9;
+        } else if (stepval == 4){
+            return 10;
+        } else if (stepval == 5){
+            return 12;
+        } else if (stepval == 6){
+            return 13;
+        } else if (stepval == 7){
+            return 14;
+        } else if (stepval == 8){
+            return 15;
+        } else if (stepval == 9){
+            return 16;
+        } else if (stepval == 10){
+            return 18;
+        } else if (stepval == 11){
+            return 20;
+        } else if (stepval == 12){
+            return 21;
+        } else if (stepval == 13){
+            return 23;
+        } else if (stepval == 14){
+            return 25;
+        } else if (stepval == 15){
+            return 27;
+        } else{
+            cerr << "step value not within 0-15" << endl;
+        }
+    }
+    else {
+        if (stepval == 0){
+            return 5;
+        } else if (stepval == 1){
+            return 6;
+        } else if (stepval == 2){
+            return 8;
+        } else if (stepval == 3){
+            return 9;
+        } else if (stepval == 4){
+            return 10;
+        } else if (stepval == 5){
+            return 13;
+        } else if (stepval == 6){
+            return 14;
+        } else if (stepval == 7){
+            return 16;
+        } else if (stepval == 8){
+            return 18;
+        } else if (stepval == 9){
+            return 20;
+        } else if (stepval == 10){
+            return 23;
+        } else if (stepval == 11){
+            return 25;
+        } else if (stepval == 12){
+            return 26;
+        } else if (stepval == 13){
+            return 29;
+        } else if (stepval == 14){
+            return 31;
+        } else if (stepval == 15){
+            return 33;
+        } else{
+            cerr << "step value not within 0-15" << endl;
+        }
+    }
+    return 0;
 
+}
 
 
 
@@ -1448,7 +1586,7 @@ vector<double>* Expressionizer::calculateLicenseeWelteExpression(const std::stri
 // Expressionizer::calculate88Expression --
 //
 //
-//      According to the following expression code of Green Welte
+//      According to the following expression code
 //      Midi track 3 (On MIDI channel 1):
 //         18: Sustain Pedal
 //         19: Bass Snakebite1
@@ -1515,6 +1653,131 @@ void Expressionizer::calculate88Expression(const std::string &option) {
         }
     }
 }
+
+
+
+//////////////////////////////
+//
+// Expressionizer::calculateDuoArtExpression --
+//
+//
+//      According to the following expression code
+//      Midi track 3:
+//         18: Soft Pedal
+//         19: Bass Snakebite1
+//         20: Bass Snakebite2
+//         21: Bass Dynamic 1
+//         22: Bass Dynamic 2
+//         23: Bass Dynamic 4
+//         24: Bass Dynamic 8
+//
+//      Midi track 4:
+//         107: Treble Dynamic 8
+//         106: Treble Dynamic 4
+//         107: Treble Dynamic 2
+//         108: Treble Dynamic 1
+//         109: Treble Snakebite1
+//         110: Treble Snakebite2
+//         113: Sustain Pedal
+void Expressionizer::calculateDuoArtExpression(const std::string &option) {
+    int track_index;
+    vector<double>* expression_list;
+    vector<double>* isFastC;
+    vector<double>* step;
+    vector<double>* pressure;
+    // vector<double>* isVolume2;
+    // vector<double>* isVolume4;
+    // vector<double>* isVolume8;
+
+    // Initial Setup of the expression curve
+    if (option == "left_hand") {
+        track_index = bass_exp_track;
+        expression_list = &exp_bass;
+        isFastC = &isFastC_bass;
+        step = &step_bass;
+        pressure = &pressure_bass;
+    } else {
+        track_index = treble_exp_track;
+        expression_list = &exp_treble;
+        isFastC = &isFastC_treble;
+        step = &step_treble;
+        pressure = &pressure_treble;
+    }
+
+    // exp_notes = notes for the expessions being processed.
+    MidiEventList& exp_notes = midi_data[track_index];
+
+    // length of the MIDI file in milliseconds (plus an extra millisecond
+    // to avoid problems):
+    int exp_length = midi_data.getFileDurationInSeconds() * 1000 + 1;
+    expression_list->resize(exp_length);
+    // set all of the times to piano by default:
+    std::fill(expression_list->begin(), expression_list->end(), 0);
+
+    step->resize(exp_length);
+    std::fill(step->begin(), step->end(), 0);  // is fast crescendo on?
+    pressure->resize(exp_length);
+    std::fill(pressure->begin(), pressure->end(), 0);  // is fast crescendo on?
+
+    isFastC->resize(exp_length);
+    std::fill(isFastC->begin(), isFastC->end(), false);
+
+
+    for (int i=0; i<exp_notes.getEventCount(); i++) {
+        MidiEvent* me = &exp_notes[i];
+        if (!me->isNoteOn()) {
+            continue;
+        }
+        int exp_no = me->getKeyNumber();  // expression number
+        int st = int(me->seconds * 1000.0 + 0.5);  // start time in milliseconds
+        int et = int((me->seconds + me->getDurationInSeconds()) * 1000.0 + 0.5);
+
+        if (exp_no == Snakebite_treble or exp_no == Snakebite_bass) { // Snakebite (only consider one) -- Fast Crescendo
+            for (int j=max(0,st-snake_gracetime); j< min(et+snake_gracetime,exp_length); j++) {
+                isFastC->at(j) = true;
+            }
+        }
+
+        if (exp_no == BassVolume1 or exp_no == TrebleVolume1) {
+            for (int j = st; j < et; j++) {
+                step->at(j) += 1;
+            }
+        } else if (exp_no == BassVolume2 or exp_no == TrebleVolume2) {
+            for (int j = st; j < et; j++) {
+                step->at(j) +=2;
+            }
+        } else if (exp_no == BassVolume4 or exp_no == TrebleVolume4) {
+            for (int j = st; j < et; j++) {
+                step->at(j) += 4;
+            }
+        } else if (exp_no == BassVolume8 or exp_no == TrebleVolume8) {
+            for (int j = st; j < et; j++) {
+                step->at(j) += 8;
+            }
+        }
+
+   }
+
+    double amount = 0.0;
+    double eps = 0.0001;
+    // Map from step to pressure
+    for (int i=1; i<exp_length; i++) {
+        // convert step value to pressure level, reference https://www.youtube.com/watch?v=w-XrDw04P2M&t=2s 3'55"
+        if (option == "left_hand") {
+            pressure->at(i) = step2pressure(step->at(i), "left");
+        } else {
+            pressure->at(i) = step2pressure(step->at(i), "right");
+        }
+        // map pressure level to MIDI velocity, 5-33 to 38-80
+        expression_list->at(i) = (pressure->at(i)-5.0)/28.0*42.0 + 38;
+        if (isFastC->at(i)) {
+            expression_list->at(i) = snake_f;   // 95 for snakebite velocity
+        }
+    }
+}
+
+
+
 
 
 //////////////////////////////

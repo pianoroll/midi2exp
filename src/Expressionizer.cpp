@@ -1770,6 +1770,7 @@ void Expressionizer::calculateDuoArtExpression(const std::string &option) {
         }
         // map pressure level to MIDI velocity, 5-33 to 38-80
         expression_list->at(i) = (pressure->at(i)-5.0)/28.0*42.0 + 38;
+        cout << expression_list->at(i) << endl;
         if (isFastC->at(i)) {
             expression_list->at(i) = snake_f;   // 95 for snakebite velocity
         }

@@ -230,7 +230,7 @@ void Expressionizer::setupDuoArt(void) {
 
     // Expression keys for Green Welte rolls:
     PedalOnKey       = 113;    // no separate on key, it is MIDI key 18, note-on
-    SoftOnKey        = 18;   // no separate on key, it is MIDI key 111, note-on
+    SoftOnKey        = 18;     // no separate on key, it is MIDI key 111, note-on
     Snakebite_treble = 109;
     Snakebite_bass   = 19;
 
@@ -312,6 +312,9 @@ void Expressionizer::addExpression(void) {
     } else if (roll_type == "green") {
         addSustainPedalling(bass_exp_track, PedalOnKey);
         addSoftPedalling(treble_exp_track, SoftOnKey);
+    } else if (roll_type == "duo-art") {
+        addSustainPedalling(treble_exp_track, PedalOnKey);
+        addSoftPedalling(bass_exp_track, SoftOnKey);
     } else if (roll_type == "88-note"){
         addSustainPedalling(bass_exp_track, PedalOnKey);
     }
@@ -1715,7 +1718,7 @@ void Expressionizer::calculateDuoArtExpression(const std::string &option) {
     std::fill(expression_list->begin(), expression_list->end(), 0);
 
     step->resize(exp_length);
-    std::fill(step->begin(), step->end(), 0);  // is fast crescendo on?
+    std::fill(step->begin(), step->end(), 0);
     pressure->resize(exp_length);
     std::fill(pressure->begin(), pressure->end(), 0);  // is fast crescendo on?
 
@@ -1768,8 +1771,15 @@ void Expressionizer::calculateDuoArtExpression(const std::string &option) {
         } else {
             pressure->at(i) = step2pressure(step->at(i), "right");
         }
-        // map pressure level to MIDI velocity, 5-33 to 38-95
-        expression_list->at(i) = (pressure->at(i)-4.0)/29.0*57.0 + 38;
+        // map pressure level to MIDI velocity, 5-33 to 38-90
+        // expression_list->at(i) = (pressure->at(i)-4.0)/29.0*57.0 + 38;
+        if (pressure->at(i) <= 10){
+            expression_list->at(i) = pressure->at(i) * 5.8 + 6.0;
+        } else if (pressure->at(i) > 10 && pressure->at(i) <= 25){
+            expression_list->at(i) = pressure->at(i) * 1.4 + 50;
+        } else {
+            expression_list->at(i) = 90;
+        }
         //cout << expression_list->at(i) << endl;
         //cout << step->at(i) << "--" << pressure->at(i) << "--" << expression_list->at(i) << endl;
         if (isFastC->at(i)) {

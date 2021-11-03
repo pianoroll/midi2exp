@@ -1745,32 +1745,56 @@ void Expressionizer::calculateDuoArtExpression(const std::string &option) {
             for (int j = st; j < et; j++) {
                 step->at(j) += 1;
             }
+            // if (option == "right_hand"){
+            //     cout << "Exp_no: " << exp_no << " V1" << " st: " << st << " et:" << et << endl;
+            // }
         } else if (exp_no == BassVolume2 or exp_no == TrebleVolume2) {
             for (int j = st; j < et; j++) {
                 step->at(j) +=2;
             }
+            // if (option == "right_hand"){
+            //     cout << "Exp_no: " << exp_no << " V2" << " st: " << st << " et:" << et << endl;
+            // }
         } else if (exp_no == BassVolume4 or exp_no == TrebleVolume4) {
             for (int j = st; j < et; j++) {
                 step->at(j) += 4;
             }
+            // if (option == "right_hand"){
+            //     cout << "Exp_no: " << exp_no << " V4" << " st: " << st << " et:" << et << endl;
+            // }
         } else if (exp_no == BassVolume8 or exp_no == TrebleVolume8) {
             for (int j = st; j < et; j++) {
                 step->at(j) += 8;
             }
+            // if (option == "right_hand"){
+            //     cout << "Exp_no: " << exp_no << " V8make" << " st: " << st << " et:" << et << endl;
+            // }
         }
 
    }
+   // if (option == "right_hand") {
+   //     for (int i=787; i < 4300; i++){
+   //          cout << step->at(i) << endl;
+   //     }
+   // }
 
     double amount = 0.0;
     double eps = 0.0001;
     // Map from step to pressure
     for (int i=1; i<exp_length; i++) {
+        // 2021-11-3 update: copy previous non-zero step
+        if (step->at(i) == 0){
+            step->at(i) = step->at(i-1);
+        }
+
         // convert step value to pressure level, reference https://www.youtube.com/watch?v=w-XrDw04P2M&t=2s 3'55"
         if (option == "left_hand") {
             pressure->at(i) = step2pressure(step->at(i), "left");
         } else {
             pressure->at(i) = step2pressure(step->at(i), "right");
         }
+
+
         // map pressure level to MIDI velocity, 5-33 to 38-90
         // expression_list->at(i) = (pressure->at(i)-4.0)/29.0*57.0 + 38;
         if (pressure->at(i) <= 10){

@@ -30,8 +30,8 @@ using namespace smf;
 //
 
 Expressionizer::Expressionizer(void) {
-    //setupRedWelte();  // default setup is for Red Welte rolls.
-    setupGreenWelte();
+    setupRedWelte();  // default setup is for Red Welte rolls.
+    //setupGreenWelte();
 }
 
 
@@ -54,8 +54,8 @@ void Expressionizer::setupRedWelte(void) {
     // expression keys for Red Welte rolls:
     PedalOnKey     = 106;
     PedalOffKey    = 107;
-    SoftOnKey      = 22;
-    SoftOffKey     = 23;
+    SoftOnKey      = 21;
+    SoftOffKey     = 20;
     roll_type      = "red";
     slow_decay_rate  = 2380;  //2380
     fastC_decay_rate = 300; // test roll shows around 170ms-200ms from min to MF hook

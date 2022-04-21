@@ -114,8 +114,8 @@ void Expressionizer::setupGreenWelte(void) {
 // 4       19    Bass crescendo on
 // 5       20    Bass sforzando off
 // 6       21    Bass sforzando on
-// 7       22    Hammer rail down (Soft pedal on)
-// 8       23    Hammer rail up (Soft pedal off)
+// 7       22    Hammer rail down (Soft pedal off)
+// 8       23    Hammer rail up (Soft pedal on)
 // 9 - 88  24-66 Notes C1 to G7, 67-103 Notes G4 to G7
 // 9       24    C1
 // 10      25    C#1
@@ -147,11 +147,11 @@ void Expressionizer::setupGreenWelte(void) {
 //
 
 void Expressionizer::setupLicenseeWelte(void) {
-    // expression keys for Red Welte rolls:
+    // expression keys for Welte Licensee rolls:
     PedalOnKey     = 106;
     PedalOffKey    = 107;
-    SoftOnKey      = 21;
-    SoftOffKey     = 20;
+    SoftOnKey      = 23;
+    SoftOffKey     = 22;
     roll_type      = "licensee";
     slow_decay_rate  = 2163; // test rolls shows 2163ms for treble SC from min to MF
     fastC_decay_rate = 220;  // test roll shows around 193ms-237ms from min to MF
@@ -1840,6 +1840,7 @@ void Expressionizer::printVelocity() {
 
 ostream& Expressionizer::printExpression(ostream& out, bool extended) {
     int maxi = std::min(exp_bass.size(), exp_treble.size());
+    out << "ms\tb_vel\tb_slowC\tb_fastC\tb_fastD\tt_vel\tt_slowC\tt_fastC\tt_fastD" << endl;
     for (int i=0; i<maxi; i++) {
         out << i << "\t" << exp_bass[i];
         if (extended) {
@@ -1849,9 +1850,9 @@ ostream& Expressionizer::printExpression(ostream& out, bool extended) {
         }
         out << "\t" << exp_treble[i];
         if (extended) {
-            out << "\t" << isSlowC_bass[i];
-            out << "\t" << isFastC_bass[i];
-            out << "\t" << isFastD_bass[i];
+            out << "\t" << isSlowC_treble[i];
+            out << "\t" << isFastC_treble[i];
+            out << "\t" << isFastD_treble[i];
         }
         out << endl;
     }
